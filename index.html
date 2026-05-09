@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Zumbara Math Challenge — Zombie Capybara Speed Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Zumbara palette: midnight blue + radioactive green + zumbara red glow */
+    --bg-0: #07101c;
+    --bg-1: #0e1a2c;
+    --bg-2: #16243a;
+    --bg-3: #1d2e48;
+    --border: #2a3e5d;
+    --text: #ecf1f8;
+    --muted: #8093ad;
+    --accent: #34d399;        /* nuclear green */
+    --accent-2: #22d3ee;       /* toxic cyan */
+    --danger: #ff3838;
+    --warn: #f59e0b;
+    --true: #34d399;
+    --false: #ff2e2e;
+    --zumbara: #ff2e2e;        /* glowing eye red */
+    --zumbara-deep: #b91c1c;
+    --sunset: #ea580c;
+    --shadow: 0 14px 40px rgba(0,0,0,0.55);
+    --radius: 14px;
+    --radius-sm: 10px;
+    --display: 'Fredoka', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --body: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(800px 480px at 90% -10%, rgba(255,46,46,0.12), transparent 65%),
+      radial-gradient(900px 500px at 50% 0%, rgba(234,88,12,0.06), transparent 70%),
+      radial-gradient(1100px 600px at 5% 110%, rgba(52,211,153,0.08), transparent 60%),
+      var(--bg-0);
+    color: var(--text);
+    font-family: var(--body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .app {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 28px 20px 80px;
+  }
+
+  header.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    gap: 12px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .brand .logo {
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255,46,46,0.25), transparent 60%),
+      linear-gradient(135deg, #1a2a44, #0d1626);
+    border: 1px solid var(--border);
+    display: grid; place-items: center;
+    box-shadow: var(--shadow), 0 0 18px rgba(255,46,46,0.15);
+    overflow: hidden;
+  }
+  .brand .logo svg { width: 38px; height: 38px; display: block; }
+  .brand .name {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: 0.5px;
+    line-height: 1;
+  }
+  .brand .name .accent { color: var(--zumbara); text-shadow: 0 0 18px rgba(255,46,46,0.45); }
+  .brand .tag {
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-top: 4px;
+    display: block;
+  }
+
+  nav.nav {
+    display: flex; gap: 6px;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    padding: 6px;
+    border-radius: 12px;
+  }
+  nav.nav button {
+    background: transparent;
+    color: var(--muted);
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    font-family: var(--body);
+    transition: all 0.15s ease;
+  }
+  nav.nav button:hover { color: var(--text); }
+  nav.nav button.active {
+    background: var(--bg-3);
+    color: var(--text);
+    box-shadow: inset 0 0 0 1px var(--border);
+  }
+
+  .card {
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  h1, h2, h3 { margin: 0 0 12px; font-family: var(--display); font-weight: 700; letter-spacing: 0.3px; }
+  h1 { font-size: 30px; }
+  p.sub { color: var(--muted); margin: 0 0 22px; font-size: 14px; line-height: 1.6; }
+
+  .form-grid { display: grid; gap: 14px; }
+  label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  input[type="text"], input[type="email"], input[type="date"], select {
+    width: 100%;
+    background: var(--bg-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 15px;
+    font-family: var(--body);
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  input:focus, select:focus {
+    border-color: var(--zumbara);
+    box-shadow: 0 0 0 3px rgba(255,46,46,0.18);
+  }
+  .field-error {
+    color: var(--danger);
+    font-size: 12px;
+    margin-top: 6px;
+    min-height: 16px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    padding: 12px 18px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: var(--body);
+    cursor: pointer;
+    transition: transform 0.05s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.2s ease;
+    user-select: none;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn-primary {
+    background: linear-gradient(135deg, #ff2e2e, #b91c1c 60%, #7a1d1d);
+    color: #fff7f7;
+    box-shadow: 0 8px 22px rgba(255,46,46,0.28), inset 0 1px 0 rgba(255,255,255,0.12);
+    text-shadow: 0 1px 0 rgba(0,0,0,0.4);
+  }
+  .btn-primary:hover { filter: brightness(1.08); box-shadow: 0 10px 28px rgba(255,46,46,0.4), inset 0 1px 0 rgba(255,255,255,0.15); }
+  .btn-ghost {
+    background: var(--bg-2);
+    color: var(--text);
+    border-color: var(--border);
+  }
+  .btn-ghost:hover { border-color: #3a4f6f; }
+  .btn-true {
+    background: rgba(52,211,153,0.12);
+    color: var(--true);
+    border-color: rgba(52,211,153,0.45);
+    box-shadow: 0 0 18px rgba(52,211,153,0.08);
+  }
+  .btn-true:hover { background: rgba(52,211,153,0.22); box-shadow: 0 0 24px rgba(52,211,153,0.18); }
+  .btn-false {
+    background: rgba(255,46,46,0.12);
+    color: var(--false);
+    border-color: rgba(255,46,46,0.45);
+    box-shadow: 0 0 18px rgba(255,46,46,0.08);
+  }
+  .btn-false:hover { background: rgba(255,46,46,0.22); box-shadow: 0 0 24px rgba(255,46,46,0.18); }
+  .btn-block { width: 100%; }
+  .btn-lg { padding: 16px 22px; font-size: 16px; }
+  .btn-xl { padding: 20px 28px; font-size: 18px; }
+
+  .row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .row > * { flex: 1; min-width: 0; }
+
+  .pill {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--bg-2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .pill.toxic { color: #34d399; border-color: rgba(52,211,153,0.3); }
+  .pill.blood { color: #ff6b6b; border-color: rgba(255,46,46,0.3); }
+
+  /* Hero scene */
+  .hero {
+    width: 100%;
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 22px;
+    border: 1px solid var(--border);
+    background: #050a14;
+  }
+  .hero svg { display: block; width: 100%; height: auto; }
+
+  /* Quiz */
+  .hud {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+  .hud .stat {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    text-align: center;
+  }
+  .hud .stat .label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-weight: 600;
+  }
+  .hud .stat .value {
+    font-size: 24px;
+    font-weight: 800;
+    margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+    font-family: var(--display);
+  }
+  .hud .stat.timer .value { color: var(--accent); text-shadow: 0 0 14px rgba(52,211,153,0.4); }
+  .hud .stat.timer.warn .value { color: var(--warn); text-shadow: 0 0 14px rgba(245,158,11,0.45); }
+  .hud .stat.timer.danger .value { color: var(--zumbara); text-shadow: 0 0 18px rgba(255,46,46,0.65); animation: pulseRed 0.7s infinite; }
+  @keyframes pulseRed {
+    0%, 100% { text-shadow: 0 0 14px rgba(255,46,46,0.5); }
+    50%      { text-shadow: 0 0 26px rgba(255,46,46,0.95); }
+  }
+
+  .progress {
+    height: 8px;
+    background: var(--bg-2);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 22px;
+    border: 1px solid var(--border);
+    position: relative;
+  }
+  .progress > .bar {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    transition: width 0.1s linear, background 0.2s ease;
+  }
+  .progress.warn > .bar { background: linear-gradient(90deg, var(--warn), #f59e0b); }
+  .progress.danger > .bar { background: linear-gradient(90deg, var(--zumbara), var(--zumbara-deep)); }
+
+  .question-box {
+    background:
+      radial-gradient(400px 200px at 50% 50%, rgba(52,211,153,0.05), transparent 70%),
+      var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 36px 24px;
+    text-align: center;
+    margin-bottom: 18px;
+    min-height: 140px;
+    display: grid;
+    place-items: center;
+    transition: box-shadow 0.2s ease;
+  }
+  .question {
+    font-size: 48px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    font-variant-numeric: tabular-nums;
+    font-family: var(--display);
+  }
+  .question.flash-good { animation: flashGood 0.4s ease; }
+  .question.flash-bad  { animation: flashBad  0.4s ease; }
+  @keyframes flashGood {
+    0%   { color: var(--text); text-shadow: none; }
+    30%  { color: var(--true); text-shadow: 0 0 24px rgba(52,211,153,0.7); }
+    100% { color: var(--text); text-shadow: none; }
+  }
+  @keyframes flashBad {
+    0%   { color: var(--text); text-shadow: none; }
+    30%  { color: var(--false); text-shadow: 0 0 24px rgba(255,46,46,0.7); }
+    100% { color: var(--text); text-shadow: none; }
+  }
+
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* Results */
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .result-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 18px;
+  }
+  .result-card .label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-weight: 600;
+  }
+  .result-card .value {
+    font-size: 28px;
+    font-weight: 700;
+    margin-top: 6px;
+    font-variant-numeric: tabular-nums;
+    font-family: var(--display);
+  }
+  .result-card.accent .value { color: var(--accent); text-shadow: 0 0 14px rgba(52,211,153,0.3); }
+  .result-card.warn .value { color: var(--warn); }
+  .result-card.blood .value { color: var(--zumbara); text-shadow: 0 0 14px rgba(255,46,46,0.3); }
+
+  .verdict {
+    text-align: center;
+    padding: 18px;
+    margin-bottom: 14px;
+    border-radius: var(--radius-sm);
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 20px;
+    border: 1px solid var(--border);
+    background: var(--bg-2);
+  }
+  .verdict.survived { color: var(--accent); border-color: rgba(52,211,153,0.4); background: rgba(52,211,153,0.05); }
+  .verdict.caught { color: var(--zumbara); border-color: rgba(255,46,46,0.4); background: rgba(255,46,46,0.05); text-shadow: 0 0 12px rgba(255,46,46,0.4); }
+
+  /* Leaderboard */
+  .lb-controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .lb-controls > nav.nav { flex: 0 0 auto; }
+  .lb-controls .age-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    padding: 6px 10px;
+    border-radius: 12px;
+  }
+  .lb-controls .age-filter label { margin: 0; font-size: 12px; }
+  .lb-controls .age-filter select {
+    background: var(--bg-2);
+    padding: 6px 10px;
+    font-size: 13px;
+    width: auto;
+    min-width: 100px;
+  }
+
+  table.lb {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+  table.lb th, table.lb td {
+    text-align: left;
+    padding: 12px 14px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  table.lb th {
+    background: #131e30;
+    color: var(--muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-size: 11px;
+  }
+  table.lb tr:last-child td { border-bottom: none; }
+  table.lb td.num { font-variant-numeric: tabular-nums; }
+  table.lb td.rank {
+    width: 50px;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  table.lb tr.me { background: rgba(255,46,46,0.07); }
+  table.lb tr.me td.rank { color: var(--zumbara); }
+  table.lb tr:nth-child(1) td.rank { color: var(--accent); }
+
+  .empty {
+    color: var(--muted);
+    text-align: center;
+    padding: 28px;
+    font-size: 14px;
+  }
+
+  /* Podium */
+  .podium {
+    display: grid;
+    grid-template-columns: 1fr 1.25fr 1fr;
+    gap: 12px;
+    align-items: end;
+    margin-bottom: 18px;
+  }
+  .podium-step {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px 10px 18px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.15s ease;
+  }
+  .podium-step.empty { opacity: 0.45; }
+  .podium-step.first {
+    background: linear-gradient(180deg, rgba(255,215,0,0.14), var(--bg-2) 70%);
+    border-color: rgba(255,215,0,0.45);
+    padding-top: 24px;
+    padding-bottom: 26px;
+    box-shadow: 0 0 28px rgba(255,215,0,0.18);
+    transform: translateY(-6px);
+  }
+  .podium-step.second {
+    background: linear-gradient(180deg, rgba(192,200,210,0.10), var(--bg-2) 70%);
+    border-color: rgba(192,200,210,0.35);
+  }
+  .podium-step.third {
+    background: linear-gradient(180deg, rgba(205,127,50,0.10), var(--bg-2) 70%);
+    border-color: rgba(205,127,50,0.35);
+  }
+  .podium-step .trophy { line-height: 0; }
+  .podium-step .rank-label {
+    font-family: var(--display);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .podium-step.first  .rank-label { color: #ffd700; }
+  .podium-step.second .rank-label { color: #d0d6e0; }
+  .podium-step.third  .rank-label { color: #d68a3e; }
+  .podium-name {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.15;
+    word-break: break-word;
+    max-width: 100%;
+  }
+  .podium-step.first .podium-name { font-size: 18px; }
+  .podium-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 12px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .podium-meta .pm-time { color: var(--accent); font-weight: 700; }
+  .podium-meta .pm-ratio { color: var(--text); }
+
+  @media (max-width: 480px) {
+    .podium { grid-template-columns: 1fr 1.25fr 1fr; gap: 6px; }
+    .podium-step { padding: 12px 6px 14px; }
+    .podium-name { font-size: 13px; }
+    .podium-step.first .podium-name { font-size: 15px; }
+  }
+
+  /* Chase scene */
+  .chase-scene {
+    width: 100%;
+    height: 78px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 14px;
+    background: linear-gradient(180deg, #0a1322 0%, #16243a 70%, #1a2540 100%);
+    position: relative;
+    transition: box-shadow 0.2s ease;
+  }
+  .chase-scene svg { width: 100%; height: 100%; display: block; }
+  .chase-scene.warn   { box-shadow: inset 0 0 18px rgba(245,158,11,0.28); }
+  .chase-scene.danger {
+    box-shadow: inset 0 0 22px rgba(255,46,46,0.35);
+    animation: chaseDangerPulse 0.6s ease-in-out infinite alternate;
+  }
+  @keyframes chaseDangerPulse {
+    from { box-shadow: inset 0 0 18px rgba(255,46,46,0.25); }
+    to   { box-shadow: inset 0 0 32px rgba(255,46,46,0.55); }
+  }
+  /* The position-controlled groups should snap, not transition (we set position every 50ms) */
+  #chase-zumb, #chase-user { transition: none; }
+
+  /* START button polish */
+  .btn-start {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    letter-spacing: 2px;
+    font-size: 22px;
+  }
+  .btn-start svg { display: block; }
+
+  .footer-note {
+    margin-top: 18px;
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+  }
+  .lore {
+    font-style: italic;
+    color: #a4b3c9;
+    font-size: 13px;
+    border-left: 3px solid var(--zumbara);
+    padding: 6px 14px;
+    margin: 0 0 22px;
+    line-height: 1.6;
+    background: rgba(255,46,46,0.04);
+    border-radius: 0 8px 8px 0;
+  }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 600px) {
+    .question { font-size: 36px; }
+    nav.nav button { padding: 8px 10px; font-size: 12px; }
+    .brand .tag { display: none; }
+    h1 { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <!-- Capybara icon with glowing red eyes -->
+        <svg viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="logoEye">
+              <stop offset="0%" stop-color="#ffd6d6"/>
+              <stop offset="35%" stop-color="#ff2e2e"/>
+              <stop offset="100%" stop-color="#ff2e2e" stop-opacity="0.6"/>
+            </radialGradient>
+          </defs>
+          <ellipse cx="50" cy="60" rx="36" ry="16" fill="#1a2742"/>
+          <ellipse cx="50" cy="36" rx="28" ry="24" fill="#243456"/>
+          <ellipse cx="30" cy="14" rx="7" ry="6" fill="#1a2742"/>
+          <ellipse cx="70" cy="14" rx="7" ry="6" fill="#1a2742"/>
+          <ellipse cx="30" cy="14" rx="3" ry="3" fill="#0e1626"/>
+          <ellipse cx="70" cy="14" rx="3" ry="3" fill="#0e1626"/>
+          <ellipse cx="50" cy="50" rx="20" ry="14" fill="#324768"/>
+          <ellipse cx="44" cy="48" rx="2" ry="2.5" fill="#0a0a14"/>
+          <ellipse cx="56" cy="48" rx="2" ry="2.5" fill="#0a0a14"/>
+          <path d="M 38 58 Q 50 66 62 58" stroke="#0a0a14" stroke-width="1.6" fill="none"/>
+          <polygon points="44,59 45.5,65 47,59" fill="#fff8dd"/>
+          <polygon points="56,59 54.5,65 53,59" fill="#fff8dd"/>
+          <circle cx="38" cy="30" r="9" fill="#0a0a14"/>
+          <circle cx="62" cy="30" r="9" fill="#0a0a14"/>
+          <circle cx="38" cy="30" r="7" fill="url(#logoEye)"/>
+          <circle cx="62" cy="30" r="7" fill="url(#logoEye)"/>
+          <circle cx="38" cy="29" r="2" fill="#ffe5e5"/>
+          <circle cx="62" cy="29" r="2" fill="#ffe5e5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="name"><span class="accent">Zumbara</span> Math Challenge</div>
+        <span class="tag">Zombie Capybara · 60-second sprint</span>
+      </div>
+    </div>
+    <nav class="nav" id="nav">
+      <button data-view="home" class="active">Home</button>
+      <button data-view="leaderboard">Leaderboard</button>
+      <button data-view="logout" id="navLogout" class="hidden">Sign out</button>
+    </nav>
+  </header>
+
+  <!-- LOGIN VIEW -->
+  <section id="view-login" class="card">
+    <h1>Enter the legend</h1>
+    <p class="sub">Sign in to face the Zumbara. Your runs and survivor ranking are saved on this device.</p>
+    <form id="loginForm" class="form-grid" autocomplete="on" novalidate>
+      <div>
+        <label for="username">Survivor name</label>
+        <input id="username" type="text" maxlength="24" placeholder="e.g. fastfingers" required />
+        <div class="field-error" id="err-username"></div>
+      </div>
+      <div>
+        <label for="email">Email</label>
+        <input id="email" type="email" placeholder="you@example.com" required />
+        <div class="field-error" id="err-email"></div>
+      </div>
+      <div>
+        <label for="dob">Date of birth</label>
+        <input id="dob" type="date" required />
+        <div class="field-error" id="err-dob"></div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-lg btn-block">Continue</button>
+    </form>
+  </section>
+
+  <!-- HOME VIEW -->
+  <section id="view-home" class="card hidden">
+    <!-- Hero scene: Zumbara on the island at dusk -->
+    <div class="hero">
+      <svg viewBox="0 0 600 240" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"  stop-color="#1a1530"/>
+            <stop offset="55%" stop-color="#3a1f3a"/>
+            <stop offset="100%" stop-color="#7a2a3a"/>
+          </linearGradient>
+          <linearGradient id="lake" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"  stop-color="#1a2540"/>
+            <stop offset="100%" stop-color="#0a1020"/>
+          </linearGradient>
+          <radialGradient id="eyeGlow">
+            <stop offset="0%"  stop-color="#ffd6d6"/>
+            <stop offset="35%" stop-color="#ff2222"/>
+            <stop offset="100%" stop-color="#ff2222" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="moonGlow">
+            <stop offset="0%"  stop-color="#fff5d8" stop-opacity="0.5"/>
+            <stop offset="100%" stop-color="#fff5d8" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Sky -->
+        <rect x="0" y="0" width="600" height="140" fill="url(#sky)"/>
+        <!-- Faint moon glow -->
+        <circle cx="500" cy="40" r="40" fill="url(#moonGlow)"/>
+        <circle cx="500" cy="40" r="9" fill="#f5e8c5" opacity="0.55"/>
+
+        <!-- Distant treeline -->
+        <path d="M 0 140 Q 40 120 80 130 T 160 122 T 240 132 T 320 124 T 400 130 T 480 122 T 600 128 L 600 140 L 0 140 Z" fill="#1a1a2e"/>
+
+        <!-- Lake -->
+        <rect x="0" y="140" width="600" height="100" fill="url(#lake)"/>
+
+        <!-- Island -->
+        <ellipse cx="300" cy="158" rx="90" ry="14" fill="#08101e"/>
+        <ellipse cx="300" cy="155" rx="78" ry="9" fill="#0e1828"/>
+
+        <!-- Zumbara silhouette on island -->
+        <ellipse cx="300" cy="135" rx="56" ry="24" fill="#070d1a"/>
+        <ellipse cx="300" cy="112" rx="36" ry="30" fill="#070d1a"/>
+        <ellipse cx="278" cy="92" rx="7" ry="6" fill="#070d1a"/>
+        <ellipse cx="322" cy="92" rx="7" ry="6" fill="#070d1a"/>
+
+        <!-- Glowing red eyes -->
+        <circle cx="288" cy="113" r="16" fill="url(#eyeGlow)"/>
+        <circle cx="312" cy="113" r="16" fill="url(#eyeGlow)"/>
+        <circle cx="288" cy="113" r="4" fill="#fff0f0"/>
+        <circle cx="312" cy="113" r="4" fill="#fff0f0"/>
+
+        <!-- Eye reflections in water (animated ripples) -->
+        <ellipse cx="288" cy="180" rx="6" ry="2" fill="#ff3030" opacity="0.65">
+          <animate attributeName="rx" values="5;10;5" dur="3s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.5;0.8;0.5" dur="3s" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse cx="312" cy="180" rx="6" ry="2" fill="#ff3030" opacity="0.65">
+          <animate attributeName="rx" values="5;10;5" dur="3.4s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.5;0.8;0.5" dur="3.4s" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse cx="288" cy="200" rx="3" ry="1" fill="#ff3030" opacity="0.35">
+          <animate attributeName="rx" values="2;6;2" dur="4s" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse cx="312" cy="200" rx="3" ry="1" fill="#ff3030" opacity="0.35">
+          <animate attributeName="rx" values="2;6;2" dur="4.4s" repeatCount="indefinite"/>
+        </ellipse>
+
+        <!-- Foreground tree silhouettes (left & right frame) -->
+        <path d="M 0 0 L 30 0 Q 36 70 50 130 L 60 240 L 0 240 Z" fill="#040810"/>
+        <path d="M 600 0 L 570 0 Q 564 70 550 130 L 540 240 L 600 240 Z" fill="#040810"/>
+        <!-- Wispy branches -->
+        <path d="M 30 60 Q 60 50 80 70" stroke="#040810" stroke-width="2.5" fill="none"/>
+        <path d="M 30 90 Q 70 80 100 100" stroke="#040810" stroke-width="2" fill="none"/>
+        <path d="M 570 60 Q 540 50 520 70" stroke="#040810" stroke-width="2.5" fill="none"/>
+        <path d="M 570 90 Q 530 80 500 100" stroke="#040810" stroke-width="2" fill="none"/>
+
+        <!-- Tiny child silhouette on shore (like the cover) -->
+        <ellipse cx="100" cy="225" rx="14" ry="3" fill="#040810"/>
+        <ellipse cx="100" cy="200" rx="9" ry="14" fill="#040810"/>
+        <circle cx="100" cy="180" r="9" fill="#040810"/>
+      </svg>
+    </div>
+
+    <h1>Welcome, <span id="helloName" style="color:var(--zumbara)">player</span></h1>
+    <p class="lore">
+      Long ago at <b>Fazenda da Toca</b>, the capybaras lived peacefully by the lake — until a nuclear plant
+      poisoned the water, a radioactive spider bit one of them, and she became <b>Zumbara</b>, the dreaded zombie capybara.
+      At dusk, if you whisper her name, she stirs.
+    </p>
+    <p class="sub">
+      You start with <b>60 seconds</b>. Each math statement is either
+      <span style="color:var(--true);font-weight:700">TRUE</span> or
+      <span style="color:var(--false);font-weight:700">FALSE</span>.
+      Every <b>correct</b> answer holds her back (<b>+1 s</b>).
+      Every <b>wrong</b> answer feeds her (<b>−1 s</b>).
+      Your run ends when the clock hits zero.
+      Survivors are ranked by who lasted the longest.
+    </p>
+    <div class="row" style="margin-bottom: 18px;">
+      <div class="pill toxic">+1 s right</div>
+      <div class="pill blood">−1 s wrong</div>
+      <div class="pill">+ − × ÷</div>
+    </div>
+    <button id="startBtn" class="btn btn-primary btn-xl btn-block btn-start" aria-label="Start the challenge — summon the Zumbara">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><polygon points="6,4 6,20 20,12"/></svg>
+      START
+    </button>
+  </section>
+
+  <!-- QUIZ VIEW -->
+  <section id="view-quiz" class="card hidden">
+    <!-- Chase animation: Zumbara closing in on the user as the timer drains -->
+    <div id="chaseScene" class="chase-scene" aria-hidden="true">
+      <svg viewBox="0 0 600 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="chaseSky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"  stop-color="#0a1322"/>
+            <stop offset="55%" stop-color="#16243a"/>
+            <stop offset="100%" stop-color="#1a2540"/>
+          </linearGradient>
+          <radialGradient id="chaseEye">
+            <stop offset="0%"  stop-color="#ffd6d6"/>
+            <stop offset="40%" stop-color="#ff2222"/>
+            <stop offset="100%" stop-color="#ff2222" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Sky / depth gradient -->
+        <rect width="600" height="80" fill="url(#chaseSky)"/>
+
+        <!-- Distant treeline silhouette -->
+        <path d="M 0 64 Q 40 50 80 62 T 160 56 T 240 62 T 320 54 T 400 60 T 480 56 T 600 62 L 600 80 L 0 80 Z" fill="#0a1220" opacity="0.85"/>
+
+        <!-- Mid bushes -->
+        <ellipse cx="80"  cy="64" rx="22" ry="6" fill="#1a2742" opacity="0.6"/>
+        <ellipse cx="220" cy="66" rx="28" ry="7" fill="#1a2742" opacity="0.55"/>
+        <ellipse cx="380" cy="64" rx="24" ry="6" fill="#1a2742" opacity="0.55"/>
+        <ellipse cx="520" cy="66" rx="20" ry="5" fill="#1a2742" opacity="0.5"/>
+
+        <!-- Ground line -->
+        <line x1="0" y1="73" x2="600" y2="73" stroke="#2a3e5d" stroke-width="0.6"/>
+
+        <!-- ZUMBARA (chaser, comes from the left) -->
+        <g id="chase-zumb" transform="translate(60 0)">
+          <g>
+            <animateTransform attributeName="transform" type="translate" values="0 0; 0 -4; 0 0" dur="0.24s" repeatCount="indefinite"/>
+            <!-- Body -->
+            <ellipse cx="0" cy="62" rx="18" ry="8" fill="#2a3a55"/>
+            <!-- Head (right side, facing right toward the user) -->
+            <ellipse cx="14" cy="52" rx="11" ry="11" fill="#324768"/>
+            <!-- Ear -->
+            <ellipse cx="9" cy="42" rx="3" ry="2.5" fill="#1f2c44"/>
+            <!-- Snout -->
+            <ellipse cx="22" cy="56" rx="5.5" ry="3" fill="#3a4f6f"/>
+            <ellipse cx="24.5" cy="55" rx="0.7" ry="1" fill="#0a0a14"/>
+            <!-- Mouth + fangs -->
+            <path d="M 17 60 Q 22 63 26 60" stroke="#0a0a14" stroke-width="0.7" fill="none"/>
+            <polygon points="20,60 21,63 22,60" fill="#fff8dd"/>
+            <polygon points="24,60 23,63 22,60" fill="#fff8dd"/>
+            <!-- Glowing red eye -->
+            <circle cx="17" cy="50" r="4" fill="url(#chaseEye)"/>
+            <circle cx="17" cy="50" r="2.2" fill="#ff2e2e"/>
+            <circle cx="17" cy="49.6" r="0.9" fill="#fff5f5"/>
+            <!-- Legs -->
+            <rect x="-9" y="68" width="3" height="6" fill="#1f2c44"/>
+            <rect x="6"  y="68" width="3" height="6" fill="#1f2c44"/>
+          </g>
+        </g>
+
+        <!-- USER capybara (fleeing, on the right) -->
+        <g id="chase-user" transform="translate(520 0)">
+          <g>
+            <animateTransform attributeName="transform" type="translate" values="0 0; 0 -3.5; 0 0" dur="0.26s" repeatCount="indefinite"/>
+            <!-- Dust puffs trailing behind (to the left of user) -->
+            <ellipse cx="-18" cy="72" rx="6" ry="1.6" fill="#4a5e7e" opacity="0.55">
+              <animate attributeName="opacity" values="0.6;0.1;0.6" dur="0.45s" repeatCount="indefinite"/>
+            </ellipse>
+            <ellipse cx="-26" cy="73" rx="4" ry="1.2" fill="#4a5e7e" opacity="0.45">
+              <animate attributeName="opacity" values="0.5;0.05;0.5" dur="0.55s" repeatCount="indefinite"/>
+            </ellipse>
+            <!-- Body -->
+            <ellipse cx="0" cy="62" rx="14" ry="7" fill="#8b5a2b"/>
+            <!-- Head -->
+            <ellipse cx="11" cy="54" rx="9" ry="9" fill="#a06a35"/>
+            <!-- Ear -->
+            <ellipse cx="6" cy="46" rx="2.5" ry="2" fill="#5d3a1a"/>
+            <!-- Snout -->
+            <ellipse cx="18" cy="58" rx="4.2" ry="2.6" fill="#704217"/>
+            <ellipse cx="20.2" cy="57" rx="0.5" ry="0.8" fill="#0a0a14"/>
+            <!-- Worried eye -->
+            <circle cx="14.5" cy="52" r="2" fill="#fff"/>
+            <circle cx="15.3" cy="52" r="1.05" fill="#0a0a14"/>
+            <!-- Frown brow -->
+            <path d="M 13 49.5 Q 15 48.6 17 49.5" stroke="#5d3a1a" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+            <!-- Legs -->
+            <rect x="-7"  y="68" width="2.5" height="6" fill="#704217"/>
+            <rect x="4.5" y="68" width="2.5" height="6" fill="#704217"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <div class="hud">
+      <div class="stat timer" id="timerStat">
+        <div class="label">Time left</div>
+        <div class="value" id="timer">60.0</div>
+      </div>
+      <div class="stat">
+        <div class="label">Held off</div>
+        <div class="value" id="correctCount" style="color: var(--accent)">0</div>
+      </div>
+      <div class="stat">
+        <div class="label">Fed her</div>
+        <div class="value" id="wrongCount" style="color: var(--zumbara)">0</div>
+      </div>
+    </div>
+    <div class="progress" id="progressWrap"><div class="bar" id="progressBar"></div></div>
+    <div class="question-box">
+      <div class="question" id="questionText">—</div>
+    </div>
+    <div class="actions">
+      <button id="btnTrue" class="btn btn-true btn-xl">TRUE</button>
+      <button id="btnFalse" class="btn btn-false btn-xl">FALSE</button>
+    </div>
+    <div class="footer-note">Tip: <b>T</b> / <b>←</b> for True · <b>F</b> / <b>→</b> for False</div>
+  </section>
+
+  <!-- RESULTS VIEW -->
+  <section id="view-results" class="card hidden">
+    <h1>The Zumbara strikes</h1>
+    <div class="verdict" id="verdict">—</div>
+    <div class="results-grid">
+      <div class="result-card accent">
+        <div class="label">Survived for</div>
+        <div class="value" id="rLen">0.0 s</div>
+      </div>
+      <div class="result-card accent">
+        <div class="label">Score (right ÷ wrong)</div>
+        <div class="value" id="rRatio">—</div>
+      </div>
+      <div class="result-card">
+        <div class="label">Held off</div>
+        <div class="value" id="rScore">0</div>
+      </div>
+      <div class="result-card blood">
+        <div class="label">Fed her</div>
+        <div class="value" id="rWrong">0</div>
+      </div>
+    </div>
+    <div class="row">
+      <button id="playAgainBtn" class="btn btn-primary btn-lg">Try again</button>
+      <button id="viewLbBtn" class="btn btn-ghost btn-lg">View survivors</button>
+    </div>
+  </section>
+
+  <!-- LEADERBOARD VIEW -->
+  <section id="view-leaderboard" class="card hidden">
+    <h1>Survivors</h1>
+    <p class="sub">Ranked by how long you held the Zumbara off. Score is the ratio of right to wrong answers.</p>
+    <div class="lb-controls">
+      <nav class="nav" id="lbTabs">
+        <button data-mode="overall" class="active">Overall</button>
+        <button data-mode="byAge">By age</button>
+      </nav>
+      <div class="age-filter" id="ageFilterWrap" style="display:none;">
+        <label for="ageSelect">Age</label>
+        <select id="ageSelect"></select>
+      </div>
+    </div>
+    <div id="lbPodium" class="podium" style="display:none;"></div>
+    <div id="lbBody"></div>
+  </section>
+
+</div>
+
+<script>
+/* ---------------- Storage ---------------- */
+const LS_USER = 'mathSprint.currentUser';
+const LS_SCORES = 'mathSprint.scores';
+
+function getCurrentUser() {
+  try { return JSON.parse(localStorage.getItem(LS_USER) || 'null'); }
+  catch { return null; }
+}
+function setCurrentUser(u) { localStorage.setItem(LS_USER, JSON.stringify(u)); }
+function clearCurrentUser() { localStorage.removeItem(LS_USER); }
+function getScores() {
+  try { return JSON.parse(localStorage.getItem(LS_SCORES) || '[]'); }
+  catch { return []; }
+}
+function saveScore(entry) {
+  const all = getScores();
+  all.push(entry);
+  localStorage.setItem(LS_SCORES, JSON.stringify(all));
+}
+
+/* ---------------- Age ---------------- */
+function ageFromDOB(dobStr) {
+  const dob = new Date(dobStr);
+  if (isNaN(dob)) return null;
+  const now = new Date();
+  let age = now.getFullYear() - dob.getFullYear();
+  const m = now.getMonth() - dob.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) age--;
+  return age;
+}
+
+/* ---------------- View routing ---------------- */
+const VIEWS = ['login', 'home', 'quiz', 'results', 'leaderboard'];
+function showView(name) {
+  VIEWS.forEach(v => {
+    document.getElementById('view-' + v).classList.toggle('hidden', v !== name);
+  });
+  document.querySelectorAll('#nav button[data-view]').forEach(b => {
+    const target = b.dataset.view;
+    let match = false;
+    if (target === 'home' && (name === 'home' || name === 'quiz' || name === 'results')) match = true;
+    if (target === 'leaderboard' && name === 'leaderboard') match = true;
+    b.classList.toggle('active', match);
+  });
+}
+
+document.getElementById('nav').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-view]');
+  if (!b) return;
+  const v = b.dataset.view;
+  if (v === 'logout') {
+    clearCurrentUser();
+    showView('login');
+    document.getElementById('navLogout').classList.add('hidden');
+    return;
+  }
+  if (!getCurrentUser()) { showView('login'); return; }
+  if (v === 'home') showView('home');
+  if (v === 'leaderboard') { renderLeaderboard(); showView('leaderboard'); }
+});
+
+/* ---------------- Login ---------------- */
+const loginForm = document.getElementById('loginForm');
+loginForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const username = document.getElementById('username').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const dob = document.getElementById('dob').value;
+
+  let ok = true;
+  const errU = document.getElementById('err-username');
+  const errE = document.getElementById('err-email');
+  const errD = document.getElementById('err-dob');
+  errU.textContent = ''; errE.textContent = ''; errD.textContent = '';
+
+  if (username.length < 2) { errU.textContent = 'Survivor name must be at least 2 characters.'; ok = false; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errE.textContent = 'Enter a valid email.'; ok = false; }
+  const age = ageFromDOB(dob);
+  if (age == null || age < 0 || age > 120) { errD.textContent = 'Enter a valid date of birth.'; ok = false; }
+  if (!ok) return;
+
+  const user = { username, email, dob, age };
+  setCurrentUser(user);
+  enterAuthedShell(user);
+});
+
+function enterAuthedShell(user) {
+  document.getElementById('helloName').textContent = user.username;
+  document.getElementById('navLogout').classList.remove('hidden');
+  showView('home');
+}
+
+/* ---------------- Question generator ---------------- */
+function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function pick(arr) { return arr[randInt(0, arr.length - 1)]; }
+
+function makeQuestion() {
+  const op = pick(['+', '-', '×', '÷']);
+  let a, b, correct;
+  if (op === '+') {
+    a = randInt(1, 50); b = randInt(1, 50);
+    correct = a + b;
+  } else if (op === '-') {
+    a = randInt(1, 50); b = randInt(1, 50);
+    if (b > a) [a, b] = [b, a];
+    correct = a - b;
+  } else if (op === '×') {
+    a = randInt(2, 12); b = randInt(2, 12);
+    correct = a * b;
+  } else {
+    b = randInt(2, 12);
+    const q = randInt(2, 12);
+    a = b * q;
+    correct = q;
+  }
+
+  const isTrue = Math.random() < 0.5;
+  let shown = correct;
+  if (!isTrue) {
+    let delta;
+    do { delta = randInt(-5, 5); } while (delta === 0);
+    shown = correct + delta;
+    if (shown < 0) shown = correct + Math.abs(delta);
+    if (shown === correct) shown = correct + 1;
+  }
+
+  return { text: `${a} ${op} ${b} = ${shown}`, isTrue };
+}
+
+/* ---------------- Audio (Web Audio API) ---------------- */
+let audioCtx = null;
+let masterGain = null;
+
+function ensureAudio() {
+  if (audioCtx) {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return;
+  }
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    audioCtx = new Ctx();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.25;
+    masterGain.connect(audioCtx.destination);
+  } catch (e) { audioCtx = null; }
+}
+
+function playTone({ type = 'sine', freq, freqEnd = null, durationMs = 150, peak = 0.6, attackMs = 4 }) {
+  if (!audioCtx) return;
+  const t0 = audioCtx.currentTime;
+  const tEnd = t0 + durationMs / 1000;
+  const osc = audioCtx.createOscillator();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, t0);
+  if (freqEnd != null) osc.frequency.exponentialRampToValueAtTime(Math.max(20, freqEnd), tEnd);
+  const env = audioCtx.createGain();
+  env.gain.setValueAtTime(0.0001, t0);
+  env.gain.exponentialRampToValueAtTime(peak, t0 + attackMs / 1000);
+  env.gain.exponentialRampToValueAtTime(0.0001, tEnd);
+  osc.connect(env);
+  env.connect(masterGain);
+  osc.start(t0);
+  osc.stop(tEnd + 0.02);
+}
+
+function playCorrect() {
+  if (!audioCtx) return;
+  playTone({ type: 'triangle', freq: 880,  freqEnd: 880,  durationMs: 70,  peak: 0.5, attackMs: 3 });
+  setTimeout(() => {
+    playTone({ type: 'triangle', freq: 1320, freqEnd: 1320, durationMs: 110, peak: 0.55, attackMs: 3 });
+  }, 60);
+}
+
+function playWrong() {
+  if (!audioCtx) return;
+  playTone({ type: 'square', freq: 220, freqEnd: 110, durationMs: 180, peak: 0.35, attackMs: 4 });
+}
+
+/* ---------------- Quiz state ---------------- */
+const START_MS = 60_000;
+const BONUS_MS = 1_000;
+const PENALTY_MS = 1_000;
+
+let state = null;
+
+function startQuiz() {
+  ensureAudio();
+  state = {
+    correct: 0,
+    wrong: 0,
+    startTs: performance.now(),
+    adjustmentMs: 0,
+    finished: false,
+    timerHandle: null,
+    currentQ: makeQuestion(),
+  };
+  document.getElementById('correctCount').textContent = '0';
+  document.getElementById('wrongCount').textContent = '0';
+  resetChase();
+  renderQuestion();
+  showView('quiz');
+  state.timerHandle = setInterval(tick, 50);
+  tick();
+}
+
+function remainingMs() {
+  if (!state) return 0;
+  const elapsed = performance.now() - state.startTs;
+  return START_MS + state.adjustmentMs - elapsed;
+}
+
+function tick() {
+  if (!state || state.finished) return;
+  const rem = remainingMs();
+  if (rem <= 0) { finishQuiz(); return; }
+  paintTimer(rem);
+}
+
+function paintTimer(rem) {
+  const secs = Math.max(0, rem / 1000);
+  document.getElementById('timer').textContent = secs.toFixed(1);
+  const maxNow = START_MS + Math.max(0, state.adjustmentMs);
+  const pct = Math.max(0, Math.min(100, (rem / maxNow) * 100));
+  document.getElementById('progressBar').style.width = pct + '%';
+  const wrap = document.getElementById('progressWrap');
+  const tStat = document.getElementById('timerStat');
+  const scene = document.getElementById('chaseScene');
+  wrap.classList.remove('warn', 'danger');
+  tStat.classList.remove('warn', 'danger');
+  scene.classList.remove('warn', 'danger');
+  if (secs <= 5)        { wrap.classList.add('danger'); tStat.classList.add('danger'); scene.classList.add('danger'); }
+  else if (secs <= 15)  { wrap.classList.add('warn');   tStat.classList.add('warn');   scene.classList.add('warn');   }
+  updateChase(rem);
+}
+
+/* Chase: position Zumbara based on remaining time vs the original 60s budget.
+   Bonuses (rem > 60s) push her off to the far left; penalties pull her closer. */
+const CHASE_FAR  = 60;   // x in the SVG viewBox where Zumbara starts (left side)
+const CHASE_NEAR = 432;  // x where she's right behind the user (user fixed at ~520)
+function updateChase(rem) {
+  const closeness = 1 - Math.max(0, Math.min(1, rem / START_MS));
+  const x = CHASE_FAR + (CHASE_NEAR - CHASE_FAR) * closeness;
+  const z = document.getElementById('chase-zumb');
+  if (z) z.setAttribute('transform', `translate(${x.toFixed(1)} 0)`);
+}
+function resetChase() {
+  const z = document.getElementById('chase-zumb');
+  const u = document.getElementById('chase-user');
+  if (z) z.setAttribute('transform', `translate(${CHASE_FAR} 0)`);
+  if (u) u.setAttribute('transform', 'translate(520 0)');
+  const scene = document.getElementById('chaseScene');
+  if (scene) scene.classList.remove('warn', 'danger');
+}
+
+function renderQuestion() {
+  document.getElementById('questionText').textContent = state.currentQ.text;
+}
+
+function flashQuestion(good) {
+  const el = document.getElementById('questionText');
+  el.classList.remove('flash-good', 'flash-bad');
+  void el.offsetWidth;
+  el.classList.add(good ? 'flash-good' : 'flash-bad');
+}
+
+function answer(userSaysTrue) {
+  if (!state || state.finished) return;
+  const correct = (userSaysTrue === state.currentQ.isTrue);
+  if (correct) {
+    state.correct++;
+    state.adjustmentMs += BONUS_MS;
+    document.getElementById('correctCount').textContent = String(state.correct);
+    playCorrect();
+  } else {
+    state.wrong++;
+    state.adjustmentMs -= PENALTY_MS;
+    document.getElementById('wrongCount').textContent = String(state.wrong);
+    playWrong();
+  }
+  flashQuestion(correct);
+  if (remainingMs() <= 0) { finishQuiz(); return; }
+  state.currentQ = makeQuestion();
+  renderQuestion();
+  tick();
+}
+
+function finishQuiz() {
+  if (state.finished) return;
+  state.finished = true;
+  clearInterval(state.timerHandle);
+  document.getElementById('progressBar').style.width = '0%';
+  document.getElementById('timer').textContent = '0.0';
+
+  const runMs = (performance.now() - state.startTs);
+  const u = getCurrentUser();
+  if (u) {
+    saveScore({
+      username: u.username,
+      age: u.age,
+      score: state.correct,
+      wrong: state.wrong,
+      runMs: Math.round(runMs),
+      ts: Date.now()
+    });
+  }
+
+  document.getElementById('rScore').textContent = String(state.correct);
+  document.getElementById('rWrong').textContent = String(state.wrong);
+  document.getElementById('rRatio').textContent = formatRatio(state.correct, state.wrong);
+  document.getElementById('rLen').textContent = (runMs / 1000).toFixed(1) + ' s';
+
+  // Verdict text
+  const verdictEl = document.getElementById('verdict');
+  const survivedLong = runMs >= 60_000;
+  if (survivedLong) {
+    verdictEl.textContent = 'You held her off. The lake is quiet… for now.';
+    verdictEl.className = 'verdict survived';
+  } else {
+    verdictEl.textContent = 'Zumbara caught you. Try again at sunset.';
+    verdictEl.className = 'verdict caught';
+  }
+
+  showView('results');
+}
+
+document.getElementById('btnTrue').addEventListener('click', () => answer(true));
+document.getElementById('btnFalse').addEventListener('click', () => answer(false));
+document.getElementById('startBtn').addEventListener('click', startQuiz);
+document.getElementById('playAgainBtn').addEventListener('click', startQuiz);
+document.getElementById('viewLbBtn').addEventListener('click', () => {
+  renderLeaderboard();
+  showView('leaderboard');
+});
+
+document.addEventListener('keydown', (e) => {
+  const quizVisible = !document.getElementById('view-quiz').classList.contains('hidden');
+  if (!quizVisible) return;
+  if (e.key === 't' || e.key === 'T' || e.key === 'ArrowLeft') { e.preventDefault(); answer(true); }
+  if (e.key === 'f' || e.key === 'F' || e.key === 'ArrowRight') { e.preventDefault(); answer(false); }
+});
+
+/* ---------------- Leaderboard ---------------- */
+let lbMode = 'overall';
+let lbAge = null;
+
+const lbTabs = document.getElementById('lbTabs');
+lbTabs.addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-mode]');
+  if (!b) return;
+  lbMode = b.dataset.mode;
+  lbTabs.querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b));
+  document.getElementById('ageFilterWrap').style.display = (lbMode === 'byAge') ? '' : 'none';
+  renderLeaderboard();
+});
+
+const ageSelect = document.getElementById('ageSelect');
+(function populateAges() {
+  for (let a = 0; a <= 100; a++) {
+    const opt = document.createElement('option');
+    opt.value = String(a);
+    opt.textContent = `${a}`;
+    ageSelect.appendChild(opt);
+  }
+})();
+ageSelect.addEventListener('change', () => {
+  lbAge = parseInt(ageSelect.value, 10);
+  renderLeaderboard();
+});
+
+function entryIsBetter(a, b) {
+  // longer run wins; tiebreak by ratio desc; then earlier timestamp
+  if (a.runMs !== b.runMs) return a.runMs > b.runMs;
+  const ra = ratioValue(a.score, a.wrong);
+  const rb = ratioValue(b.score, b.wrong);
+  if (ra !== rb) return ra > rb;
+  return a.ts < b.ts;
+}
+
+function bestPerUser(scores) {
+  const map = new Map();
+  for (const s of scores) {
+    const cur = map.get(s.username);
+    if (!cur || entryIsBetter(s, cur)) map.set(s.username, s);
+  }
+  return Array.from(map.values());
+}
+
+function trophySVG(rank) {
+  const palette = { 1: '#ffd700', 2: '#d0d6e0', 3: '#cd7f32' };
+  const dark    = { 1: '#8a6d00', 2: '#5a6470', 3: '#5a3818' };
+  const color = palette[rank];
+  const ink = dark[rank];
+  const size = rank === 1 ? 64 : 52;
+  return `<svg viewBox="0 0 100 120" width="${size}" height="${Math.round(size * 1.2)}" aria-hidden="true">
+    <path d="M 25 36 Q 8 36 8 52 Q 8 70 26 70" stroke="${color}" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <path d="M 75 36 Q 92 36 92 52 Q 92 70 74 70" stroke="${color}" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <path d="M 22 18 L 78 18 L 75 65 Q 72 84 50 84 Q 28 84 25 65 Z" fill="${color}"/>
+    <path d="M 22 18 L 78 18 L 76 28 L 24 28 Z" fill="rgba(255,255,255,0.25)"/>
+    <text x="50" y="62" text-anchor="middle" font-size="30" font-weight="900" font-family="Fredoka, system-ui, sans-serif" fill="${ink}">${rank}</text>
+    <rect x="44" y="84"  width="12" height="14" fill="${color}"/>
+    <rect x="30" y="98"  width="40" height="6"  fill="${color}" rx="2"/>
+    <rect x="22" y="104" width="56" height="10" fill="${color}" rx="2"/>
+  </svg>`;
+}
+
+function rankSuffix(n) {
+  return n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th';
+}
+
+function renderPodium(top3, meUsername) {
+  const podium = document.getElementById('lbPodium');
+  if (top3.length === 0) {
+    podium.style.display = 'none';
+    podium.innerHTML = '';
+    return;
+  }
+  podium.style.display = 'grid';
+  // Visual order: 2nd · 1st · 3rd
+  const order = [
+    { rank: 2, cls: 'second' },
+    { rank: 1, cls: 'first' },
+    { rank: 3, cls: 'third' },
+  ];
+  podium.innerHTML = order.map(slot => {
+    const e = top3[slot.rank - 1];
+    if (!e) {
+      return `<div class="podium-step ${slot.cls} empty">
+        <div class="trophy">${trophySVG(slot.rank)}</div>
+        <div class="rank-label">${slot.rank}${rankSuffix(slot.rank)}</div>
+        <div class="podium-name" style="color:var(--muted)">—</div>
+        <div class="podium-meta"><span>no entry</span></div>
+      </div>`;
+    }
+    const isMe = meUsername && e.username === meUsername;
+    return `<div class="podium-step ${slot.cls}${isMe ? ' me' : ''}">
+      <div class="trophy">${trophySVG(slot.rank)}</div>
+      <div class="rank-label">${slot.rank}${rankSuffix(slot.rank)}</div>
+      <div class="podium-name">${escapeHtml(e.username)}</div>
+      <div class="podium-meta">
+        <span class="pm-time">${(e.runMs / 1000).toFixed(1)}s</span>
+        <span class="pm-ratio">${formatRatio(e.score, e.wrong)} ratio</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderLeaderboard() {
+  const all = getScores();
+  let filtered = all;
+  let title = '';
+
+  if (lbMode === 'byAge') {
+    if (lbAge == null) {
+      const u = getCurrentUser();
+      lbAge = (u && typeof u.age === 'number') ? u.age : 25;
+      ageSelect.value = String(lbAge);
+    }
+    filtered = all.filter(s => s.age === lbAge);
+    title = `Age ${lbAge}`;
+  } else {
+    title = 'Overall';
+  }
+
+  // Deduplicate: best run per user
+  let unique = bestPerUser(filtered);
+
+  // Sort: longest run desc, then ratio desc, then ts asc
+  unique.sort((a, b) => {
+    if (b.runMs !== a.runMs) return b.runMs - a.runMs;
+    const ra = ratioValue(a.score, a.wrong);
+    const rb = ratioValue(b.score, b.wrong);
+    if (rb !== ra) return rb - ra;
+    return a.ts - b.ts;
+  });
+
+  const me = getCurrentUser();
+  const meName = me ? me.username : null;
+  const body = document.getElementById('lbBody');
+
+  // Podium (always rendered if at least one entry; missing slots are empty)
+  renderPodium(unique.slice(0, 3), meName);
+
+  if (unique.length === 0) {
+    body.innerHTML = `<div class="empty">No survivors in ${escapeHtml(title)} yet. Be the first.</div>`;
+    return;
+  }
+
+  // Table from rank 4 onward (top 3 are already in the podium)
+  const rest = unique.slice(3, 100);
+  if (rest.length === 0) {
+    body.innerHTML = '';
+    return;
+  }
+  const rows = rest.map((s, i) => {
+    const rank = i + 4;
+    const isMe = meName && s.username === meName;
+    return `<tr class="${isMe ? 'me' : ''}">
+      <td class="rank">#${rank}</td>
+      <td>${escapeHtml(s.username)}</td>
+      <td class="num">${s.age ?? '—'}</td>
+      <td class="num">${(s.runMs / 1000).toFixed(1)}s</td>
+      <td class="num">${formatRatio(s.score, s.wrong)}</td>
+      <td class="num">${s.score}</td>
+      <td class="num">${s.wrong}</td>
+    </tr>`;
+  }).join('');
+
+  body.innerHTML = `
+    <table class="lb">
+      <thead>
+        <tr>
+          <th>#</th><th>Survivor</th><th>Age</th><th>Survived</th><th>Score</th><th>Right</th><th>Wrong</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+function ratioValue(correct, wrong) {
+  if (wrong === 0) return correct > 0 ? Infinity : 0;
+  return correct / wrong;
+}
+function formatRatio(correct, wrong) {
+  if (wrong === 0 && correct === 0) return '—';
+  if (wrong === 0) return '∞';
+  return (correct / wrong).toFixed(2);
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+/* ---------------- Boot ---------------- */
+(function boot() {
+  const u = getCurrentUser();
+  if (u) enterAuthedShell(u);
+  else showView('login');
+})();
+</script>
+</body>
+</html>
