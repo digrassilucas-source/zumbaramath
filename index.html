@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- No external SDK needed — Supabase uses standard fetch() -->
 <style>
   :root {
     /* Zumbara palette: midnight blue + radioactive green + zumbara red glow */
@@ -543,6 +544,15 @@
     from { box-shadow: inset 0 0 18px rgba(255,46,46,0.25); }
     to   { box-shadow: inset 0 0 32px rgba(255,46,46,0.55); }
   }
+  @keyframes chaseSceneBite {
+    0%   { box-shadow: inset 0 0 0 5px rgba(255,46,46,1),   inset 0 0 100px rgba(255,46,46,0.9); }
+    35%  { box-shadow: inset 0 0 0 3px rgba(255,46,46,0.75), inset 0 0  60px rgba(255,46,46,0.6); }
+    60%  { box-shadow: inset 0 0 0 4px rgba(255,46,46,0.85), inset 0 0  75px rgba(255,46,46,0.75); }
+    100% { box-shadow: inset 0 0 0 3px rgba(255,46,46,0.65), inset 0 0  50px rgba(255,46,46,0.5); }
+  }
+  .chase-scene.biting {
+    animation: chaseSceneBite 0.55s ease-out forwards !important;
+  }
   /* The position-controlled groups should snap, not transition (we set position every 50ms) */
   #chase-zumb, #chase-user { transition: none; }
 
@@ -576,6 +586,26 @@
   }
 
   .hidden { display: none !important; }
+
+  /* Firebase setup banner */
+  .fb-banner {
+    background: rgba(245,158,11,0.12);
+    border: 1px solid rgba(245,158,11,0.45);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--warn);
+    margin-bottom: 14px;
+    line-height: 1.6;
+  }
+  .fb-banner strong { color: #fcd34d; }
+  .fb-banner code {
+    font-family: monospace;
+    font-size: 12px;
+    background: rgba(0,0,0,0.3);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
 
   @media (max-width: 600px) {
     .question { font-size: 36px; }
@@ -641,11 +671,6 @@
         <label for="username">Survivor name</label>
         <input id="username" type="text" maxlength="24" placeholder="e.g. fastfingers" required />
         <div class="field-error" id="err-username"></div>
-      </div>
-      <div>
-        <label for="email">Email</label>
-        <input id="email" type="email" placeholder="you@example.com" required />
-        <div class="field-error" id="err-email"></div>
       </div>
       <div>
         <label for="dob">Date of birth</label>
@@ -815,9 +840,9 @@
             <ellipse cx="22" cy="56" rx="5.5" ry="3" fill="#3a4f6f"/>
             <ellipse cx="24.5" cy="55" rx="0.7" ry="1" fill="#0a0a14"/>
             <!-- Mouth + fangs -->
-            <path d="M 17 60 Q 22 63 26 60" stroke="#0a0a14" stroke-width="0.7" fill="none"/>
-            <polygon points="20,60 21,63 22,60" fill="#fff8dd"/>
-            <polygon points="24,60 23,63 22,60" fill="#fff8dd"/>
+            <path id="zumb-mouth" d="M 17 60 Q 22 63 26 60" stroke="#0a0a14" stroke-width="0.7" fill="none"/>
+            <polygon id="zumb-fang-l" points="20,60 21,63 22,60" fill="#fff8dd"/>
+            <polygon id="zumb-fang-r" points="24,60 23,63 22,60" fill="#fff8dd"/>
             <!-- Glowing red eye -->
             <circle cx="17" cy="50" r="4" fill="url(#chaseEye)"/>
             <circle cx="17" cy="50" r="2.2" fill="#ff2e2e"/>
@@ -848,11 +873,18 @@
             <!-- Snout -->
             <ellipse cx="18" cy="58" rx="4.2" ry="2.6" fill="#704217"/>
             <ellipse cx="20.2" cy="57" rx="0.5" ry="0.8" fill="#0a0a14"/>
-            <!-- Worried eye -->
-            <circle cx="14.5" cy="52" r="2" fill="#fff"/>
-            <circle cx="15.3" cy="52" r="1.05" fill="#0a0a14"/>
+            <!-- Worried eye (normal) -->
+            <g id="user-eye-normal">
+              <circle cx="14.5" cy="52" r="2" fill="#fff"/>
+              <circle cx="15.3" cy="52" r="1.05" fill="#0a0a14"/>
+            </g>
+            <!-- X eye (bitten) -->
+            <g id="user-eye-hurt" style="display:none">
+              <line x1="12.5" y1="50" x2="16.5" y2="54" stroke="#ff2e2e" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="16.5" y1="50" x2="12.5" y2="54" stroke="#ff2e2e" stroke-width="1.5" stroke-linecap="round"/>
+            </g>
             <!-- Frown brow -->
-            <path d="M 13 49.5 Q 15 48.6 17 49.5" stroke="#5d3a1a" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+            <path id="user-brow" d="M 13 49.5 Q 15 48.6 17 49.5" stroke="#5d3a1a" stroke-width="0.7" fill="none" stroke-linecap="round"/>
             <!-- Legs -->
             <rect x="-7"  y="68" width="2.5" height="6" fill="#704217"/>
             <rect x="4.5" y="68" width="2.5" height="6" fill="#704217"/>
@@ -918,6 +950,10 @@
   <section id="view-leaderboard" class="card hidden">
     <h1>Survivors</h1>
     <p class="sub">Ranked by how long you held the Zumbara off. Score is the ratio of right to wrong answers.</p>
+    <div id="fbBanner" class="fb-banner hidden">
+      <strong>⚠ Local scores only</strong> — Supabase is not configured, so the leaderboard only shows scores from <em>this device</em>.
+      To sync scores across all devices, follow the setup steps in the <code>SUPABASE CONFIG</code> comment at the top of the &lt;script&gt; block.
+    </div>
     <div class="lb-controls">
       <nav class="nav" id="lbTabs">
         <button data-mode="overall" class="active">Overall</button>
@@ -935,9 +971,49 @@
 </div>
 
 <script>
+/* ================================================================
+   SUPABASE CONFIG  — cloud leaderboard (free, safe to commit)
+   ----------------------------------------------------------------
+   SETUP (takes ~3 minutes):
+
+   1. Create a free project at https://supabase.com
+
+   2. Open the SQL Editor in your project and run:
+
+      create table scores (
+        id        bigserial primary key,
+        username  text    not null,
+        age       integer,
+        score     integer,
+        wrong     integer,
+        "runMs"   integer,
+        ts        bigint
+      );
+      alter table scores enable row level security;
+      create policy "anon_select" on scores for select using (true);
+      create policy "anon_insert" on scores for insert with check (true);
+
+   3. Go to Project Settings → API and copy:
+      • Project URL  → SUPABASE_URL below
+      • anon / public key → SUPABASE_ANON_KEY below
+
+   The anon key is intentionally public — it only has the read/insert
+   permissions set above. Safe to commit to a public GitHub repo.
+   ================================================================ */
+const SUPABASE_URL      = 'YOUR_SUPABASE_URL';       // e.g. https://abcxyz.supabase.co
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';  // anon/public key — safe to commit
+
+const _sbReady = (SUPABASE_URL !== 'YOUR_SUPABASE_URL');
+
+if (_sbReady) {
+  console.info('Supabase configured — scores will sync across all devices.');
+} else {
+  console.warn('Supabase not configured — scores will only be saved locally on this device.');
+}
+
 /* ---------------- Storage ---------------- */
-const LS_USER = 'mathSprint.currentUser';
-const LS_SCORES = 'mathSprint.scores';
+const LS_USER   = 'mathSprint.currentUser';
+const LS_SCORES = 'mathSprint.scores'; // local backup, always written
 
 function getCurrentUser() {
   try { return JSON.parse(localStorage.getItem(LS_USER) || 'null'); }
@@ -945,14 +1021,56 @@ function getCurrentUser() {
 }
 function setCurrentUser(u) { localStorage.setItem(LS_USER, JSON.stringify(u)); }
 function clearCurrentUser() { localStorage.removeItem(LS_USER); }
-function getScores() {
+
+/* Returns all scores. Prefers Supabase (cross-device); falls back to localStorage. */
+async function getScores() {
+  if (_sbReady) {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/scores?select=*`, {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        }
+      });
+      if (res.ok) return await res.json();
+      console.error('Supabase read error:', res.status, await res.text());
+    } catch (e) {
+      console.error('Supabase read failed, falling back to localStorage:', e);
+    }
+  }
   try { return JSON.parse(localStorage.getItem(LS_SCORES) || '[]'); }
   catch { return []; }
 }
-function saveScore(entry) {
-  const all = getScores();
-  all.push(entry);
-  localStorage.setItem(LS_SCORES, JSON.stringify(all));
+
+/* Saves a score entry. Always writes to localStorage; also writes to Supabase if configured. */
+async function saveScore(entry) {
+  // Local backup — always
+  try {
+    const local = JSON.parse(localStorage.getItem(LS_SCORES) || '[]');
+    local.push(entry);
+    localStorage.setItem(LS_SCORES, JSON.stringify(local));
+  } catch (e) {
+    console.warn('localStorage write failed:', e);
+  }
+
+  // Cross-device — Supabase
+  if (_sbReady) {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/scores`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify(entry),
+      });
+      if (!res.ok) console.error('Supabase insert failed:', res.status, await res.text());
+    } catch (e) {
+      console.error('Supabase write failed (score still saved locally):', e);
+    }
+  }
 }
 
 /* ---------------- Age ---------------- */
@@ -993,7 +1111,7 @@ document.getElementById('nav').addEventListener('click', (e) => {
   }
   if (!getCurrentUser()) { showView('login'); return; }
   if (v === 'home') showView('home');
-  if (v === 'leaderboard') { renderLeaderboard(); showView('leaderboard'); }
+  if (v === 'leaderboard') { showView('leaderboard'); renderLeaderboard(); }
 });
 
 /* ---------------- Login ---------------- */
@@ -1001,22 +1119,19 @@ const loginForm = document.getElementById('loginForm');
 loginForm.addEventListener('submit', (e) => {
   e.preventDefault();
   const username = document.getElementById('username').value.trim();
-  const email = document.getElementById('email').value.trim();
   const dob = document.getElementById('dob').value;
 
   let ok = true;
   const errU = document.getElementById('err-username');
-  const errE = document.getElementById('err-email');
   const errD = document.getElementById('err-dob');
-  errU.textContent = ''; errE.textContent = ''; errD.textContent = '';
+  errU.textContent = ''; errD.textContent = '';
 
   if (username.length < 2) { errU.textContent = 'Survivor name must be at least 2 characters.'; ok = false; }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errE.textContent = 'Enter a valid email.'; ok = false; }
   const age = ageFromDOB(dob);
   if (age == null || age < 0 || age > 120) { errD.textContent = 'Enter a valid date of birth.'; ok = false; }
   if (!ok) return;
 
-  const user = { username, email, dob, age };
+  const user = { username, dob, age };
   setCurrentUser(user);
   enterAuthedShell(user);
 });
@@ -1080,6 +1195,9 @@ function ensureAudio() {
     masterGain = audioCtx.createGain();
     masterGain.gain.value = 0.25;
     masterGain.connect(audioCtx.destination);
+    // Mobile browsers (iOS Safari especially) start AudioContext suspended
+    // even inside a user-gesture handler — resume immediately.
+    if (audioCtx.state === 'suspended') audioCtx.resume();
   } catch (e) { audioCtx = null; }
 }
 
@@ -1174,7 +1292,7 @@ function paintTimer(rem) {
 /* Chase: position Zumbara based on remaining time vs the original 60s budget.
    Bonuses (rem > 60s) push her off to the far left; penalties pull her closer. */
 const CHASE_FAR  = 60;   // x in the SVG viewBox where Zumbara starts (left side)
-const CHASE_NEAR = 432;  // x where she's right behind the user (user fixed at ~520)
+const CHASE_NEAR = 478;  // x where she's right behind the user at t=0 (user fixed at ~520)
 function updateChase(rem) {
   const closeness = 1 - Math.max(0, Math.min(1, rem / START_MS));
   const x = CHASE_FAR + (CHASE_NEAR - CHASE_FAR) * closeness;
@@ -1187,7 +1305,68 @@ function resetChase() {
   if (z) z.setAttribute('transform', `translate(${CHASE_FAR} 0)`);
   if (u) u.setAttribute('transform', 'translate(520 0)');
   const scene = document.getElementById('chaseScene');
-  if (scene) scene.classList.remove('warn', 'danger');
+  if (scene) scene.classList.remove('warn', 'danger', 'biting');
+
+  // Reset bite-state SVG elements
+  const mouth = document.getElementById('zumb-mouth');
+  const fangL = document.getElementById('zumb-fang-l');
+  const fangR = document.getElementById('zumb-fang-r');
+  if (mouth) mouth.setAttribute('d', 'M 17 60 Q 22 63 26 60');
+  if (fangL) fangL.setAttribute('points', '20,60 21,63 22,60');
+  if (fangR) fangR.setAttribute('points', '24,60 23,63 22,60');
+  const eyeNormal = document.getElementById('user-eye-normal');
+  const eyeHurt   = document.getElementById('user-eye-hurt');
+  const brow      = document.getElementById('user-brow');
+  if (eyeNormal) eyeNormal.style.display = '';
+  if (eyeHurt)   eyeHurt.style.display   = 'none';
+  if (brow)      brow.setAttribute('d', 'M 13 49.5 Q 15 48.6 17 49.5');
+}
+
+function playBiteAnimation() {
+  const zumb      = document.getElementById('chase-zumb');
+  const user      = document.getElementById('chase-user');
+  const scene     = document.getElementById('chaseScene');
+  const mouth     = document.getElementById('zumb-mouth');
+  const fangL     = document.getElementById('zumb-fang-l');
+  const fangR     = document.getElementById('zumb-fang-r');
+  const eyeNormal = document.getElementById('user-eye-normal');
+  const eyeHurt   = document.getElementById('user-eye-hurt');
+  const brow      = document.getElementById('user-brow');
+
+  function openMouth() {
+    if (mouth) mouth.setAttribute('d', 'M 14 57 Q 22 74 28 57');
+    if (fangL) fangL.setAttribute('points', '18,57 19.5,69 21,57');
+    if (fangR) fangR.setAttribute('points', '26,57 24.5,69 23,57');
+  }
+  function closeMouth() {
+    if (mouth) mouth.setAttribute('d', 'M 17 60 Q 22 63 26 60');
+    if (fangL) fangL.setAttribute('points', '20,60 21,63 22,60');
+    if (fangR) fangR.setAttribute('points', '24,60 23,63 22,60');
+  }
+
+  // Phase 1 — Zumbara lunges onto the user, mouth open
+  if (zumb) zumb.setAttribute('transform', 'translate(492 0)');
+  scene.classList.remove('warn', 'danger');
+  scene.classList.add('biting');
+  openMouth();
+
+  // Phase 2 — 200ms: chomp snaps shut, user recoils with X eyes
+  setTimeout(() => {
+    closeMouth();
+    if (user) user.setAttribute('transform', 'translate(537 0)');
+    if (eyeNormal) eyeNormal.style.display = 'none';
+    if (eyeHurt)   eyeHurt.style.display   = '';
+    if (brow)      brow.setAttribute('d', 'M 13 51.5 Q 15 49.5 17 51.5'); // pain arch
+
+    // Phase 3 — 350ms: second chomp
+    setTimeout(() => {
+      openMouth();
+      // Phase 4 — 500ms: snap shut and settle
+      setTimeout(() => {
+        closeMouth();
+      }, 150);
+    }, 150);
+  }, 200);
 }
 
 function renderQuestion() {
@@ -1203,6 +1382,7 @@ function flashQuestion(good) {
 
 function answer(userSaysTrue) {
   if (!state || state.finished) return;
+  ensureAudio(); // re-check on every tap — critical for mobile AudioContext unlock
   const correct = (userSaysTrue === state.currentQ.isTrue);
   if (correct) {
     state.correct++;
@@ -1232,6 +1412,8 @@ function finishQuiz() {
   const runMs = (performance.now() - state.startTs);
   const u = getCurrentUser();
   if (u) {
+    // saveScore is async; fire-and-forget (localStorage write is immediate,
+    // Firestore write resolves in the background).
     saveScore({
       username: u.username,
       age: u.age,
@@ -1239,7 +1421,7 @@ function finishQuiz() {
       wrong: state.wrong,
       runMs: Math.round(runMs),
       ts: Date.now()
-    });
+    }).catch(e => console.error('saveScore error:', e));
   }
 
   document.getElementById('rScore').textContent = String(state.correct);
@@ -1258,7 +1440,9 @@ function finishQuiz() {
     verdictEl.className = 'verdict caught';
   }
 
-  showView('results');
+  // Play the bite animation in the chase scene, then transition to results
+  playBiteAnimation();
+  setTimeout(() => showView('results'), 750);
 }
 
 document.getElementById('btnTrue').addEventListener('click', () => answer(true));
@@ -1266,8 +1450,8 @@ document.getElementById('btnFalse').addEventListener('click', () => answer(false
 document.getElementById('startBtn').addEventListener('click', startQuiz);
 document.getElementById('playAgainBtn').addEventListener('click', startQuiz);
 document.getElementById('viewLbBtn').addEventListener('click', () => {
-  renderLeaderboard();
   showView('leaderboard');
+  renderLeaderboard();
 });
 
 document.addEventListener('keydown', (e) => {
@@ -1382,8 +1566,20 @@ function renderPodium(top3, meUsername) {
   }).join('');
 }
 
-function renderLeaderboard() {
-  const all = getScores();
+async function renderLeaderboard() {
+  // Show/hide the "local only" warning banner
+  const banner = document.getElementById('fbBanner');
+  if (banner) banner.classList.toggle('hidden', _sbReady);
+
+  // Show a loading placeholder while fetching from Supabase
+  const body = document.getElementById('lbBody');
+  const podium = document.getElementById('lbPodium');
+  if (_sbReady) {
+    body.innerHTML = '<div class="empty" style="color:var(--muted)">Loading scores…</div>';
+    if (podium) podium.style.display = 'none';
+  }
+
+  const all = await getScores();
   let filtered = all;
   let title = '';
 
@@ -1413,7 +1609,6 @@ function renderLeaderboard() {
 
   const me = getCurrentUser();
   const meName = me ? me.username : null;
-  const body = document.getElementById('lbBody');
 
   // Podium (always rendered if at least one entry; missing slots are empty)
   renderPodium(unique.slice(0, 3), meName);
