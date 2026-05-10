@@ -1655,8 +1655,8 @@ function ratioValue(correct, wrong) {
   return correct / wrong;
 }
 function formatRatio(correct, wrong) {
-  if (wrong === 0 && correct === 0) return '‚Äî';
-  if (wrong === 0) return '‚àû';
+    if (wrong === 0 && correct === 0) return '—';
+    if (wrong === 0) return '∞';
   return (correct / wrong).toFixed(2);
 }
 function escapeHtml(s) {
