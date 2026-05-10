@@ -1147,7 +1147,7 @@ function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) 
 function pick(arr) { return arr[randInt(0, arr.length - 1)]; }
 
 function makeQuestion() {
-  const op = pick(['+', '-', '√ó', '√∑']);
+    const op = pick(['+', '-', '×', '÷']);
   let a, b, correct;
   if (op === '+') {
     a = randInt(1, 50); b = randInt(1, 50);
@@ -1156,7 +1156,7 @@ function makeQuestion() {
     a = randInt(1, 50); b = randInt(1, 50);
     if (b > a) [a, b] = [b, a];
     correct = a - b;
-  } else if (op === '√ó') {
+  } else if (op === '×') {
     a = randInt(2, 12); b = randInt(2, 12);
     correct = a * b;
   } else {
