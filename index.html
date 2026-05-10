@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Zumbara Math Challenge — Zombie Capybara Speed Test</title>
+<title>Zumbara Math Challenge ‚Äî Zombie Capybara Speed Test</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<!-- No external SDK needed — Supabase uses standard fetch() -->
+<!-- No external SDK needed ‚Äî Supabase uses standard fetch() -->
 <style>
   :root {
     /* Zumbara palette: midnight blue + radioactive green + zumbara red glow */
@@ -652,7 +652,7 @@
       </div>
       <div>
         <div class="name"><span class="accent">Zumbara</span> Math Challenge</div>
-        <span class="tag">Zombie Capybara · 60-second sprint</span>
+        <span class="tag">Zombie Capybara ¬∑ 60-second sprint</span>
       </div>
     </div>
     <nav class="nav" id="nav">
@@ -769,7 +769,7 @@
 
     <h1>Welcome, <span id="helloName" style="color:var(--zumbara)">player</span></h1>
     <p class="lore">
-      Long ago at <b>Fazenda da Toca</b>, the capybaras lived peacefully by the lake — until a nuclear plant
+      Long ago at <b>Fazenda da Toca</b>, the capybaras lived peacefully by the lake ‚Äî until a nuclear plant
       poisoned the water, a radioactive spider bit one of them, and she became <b>Zumbara</b>, the dreaded zombie capybara.
       At dusk, if you whisper her name, she stirs.
     </p>
@@ -778,16 +778,16 @@
       <span style="color:var(--true);font-weight:700">TRUE</span> or
       <span style="color:var(--false);font-weight:700">FALSE</span>.
       Every <b>correct</b> answer holds her back (<b>+1 s</b>).
-      Every <b>wrong</b> answer feeds her (<b>−1 s</b>).
+      Every <b>wrong</b> answer feeds her (<b>‚àí1 s</b>).
       Your run ends when the clock hits zero.
       Survivors are ranked by who lasted the longest.
     </p>
     <div class="row" style="margin-bottom: 18px;">
       <div class="pill toxic">+1 s right</div>
-      <div class="pill blood">−1 s wrong</div>
-      <div class="pill">+ − × ÷</div>
+      <div class="pill blood">‚àí1 s wrong</div>
+      <div class="pill">+ ‚àí √ó √∑</div>
     </div>
-    <button id="startBtn" class="btn btn-primary btn-xl btn-block btn-start" aria-label="Start the challenge — summon the Zumbara">
+    <button id="startBtn" class="btn btn-primary btn-xl btn-block btn-start" aria-label="Start the challenge ‚Äî summon the Zumbara">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><polygon points="6,4 6,20 20,12"/></svg>
       START
     </button>
@@ -909,27 +909,27 @@
     </div>
     <div class="progress" id="progressWrap"><div class="bar" id="progressBar"></div></div>
     <div class="question-box">
-      <div class="question" id="questionText">—</div>
+      <div class="question" id="questionText">‚Äî</div>
     </div>
     <div class="actions">
       <button id="btnTrue" class="btn btn-true btn-xl">TRUE</button>
       <button id="btnFalse" class="btn btn-false btn-xl">FALSE</button>
     </div>
-    <div class="footer-note">Tip: <b>T</b> / <b>←</b> for True · <b>F</b> / <b>→</b> for False</div>
+    <div class="footer-note">Tip: <b>T</b> / <b>‚Üê</b> for True ¬∑ <b>F</b> / <b>‚Üí</b> for False</div>
   </section>
 
   <!-- RESULTS VIEW -->
   <section id="view-results" class="card hidden">
     <h1>The Zumbara strikes</h1>
-    <div class="verdict" id="verdict">—</div>
+    <div class="verdict" id="verdict">‚Äî</div>
     <div class="results-grid">
       <div class="result-card accent">
         <div class="label">Survived for</div>
         <div class="value" id="rLen">0.0 s</div>
       </div>
       <div class="result-card accent">
-        <div class="label">Score (right ÷ wrong)</div>
-        <div class="value" id="rRatio">—</div>
+        <div class="label">Score (right √∑ wrong)</div>
+        <div class="value" id="rRatio">‚Äî</div>
       </div>
       <div class="result-card">
         <div class="label">Held off</div>
@@ -951,7 +951,7 @@
     <h1>Survivors</h1>
     <p class="sub">Ranked by how long you held the Zumbara off. Score is the ratio of right to wrong answers.</p>
     <div id="fbBanner" class="fb-banner hidden">
-      <strong>⚠ Local scores only</strong> — Supabase is not configured, so the leaderboard only shows scores from <em>this device</em>.
+      <strong>‚ö† Local scores only</strong> ‚Äî Supabase is not configured, so the leaderboard only shows scores from <em>this device</em>.
       To sync scores across all devices, follow the setup steps in the <code>SUPABASE CONFIG</code> comment at the top of the &lt;script&gt; block.
     </div>
     <div class="lb-controls">
@@ -972,7 +972,7 @@
 
 <script>
 /* ================================================================
-   SUPABASE CONFIG  — cloud leaderboard (free, safe to commit)
+   SUPABASE CONFIG  ‚Äî cloud leaderboard (free, safe to commit)
    ----------------------------------------------------------------
    SETUP (takes ~3 minutes):
 
@@ -993,22 +993,22 @@
       create policy "anon_select" on scores for select using (true);
       create policy "anon_insert" on scores for insert with check (true);
 
-   3. Go to Project Settings → API and copy:
-      • Project URL  → SUPABASE_URL below
-      • anon / public key → SUPABASE_ANON_KEY below
+   3. Go to Project Settings ‚Üí API and copy:
+      ‚Ä¢ Project URL  ‚Üí SUPABASE_URL below
+      ‚Ä¢ anon / public key ‚Üí SUPABASE_ANON_KEY below
 
-   The anon key is intentionally public — it only has the read/insert
+   The anon key is intentionally public ‚Äî it only has the read/insert
    permissions set above. Safe to commit to a public GitHub repo.
    ================================================================ */
-const SUPABASE_URL      = 'YOUR_SUPABASE_URL';       // e.g. https://abcxyz.supabase.co
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';  // anon/public key — safe to commit
+const SUPABASE_URL      = 'https://xcrjobmvuedhjdxtinur.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjcmpvYm12dWVkaGpkeHRpbnVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNDY2NDEsImV4cCI6MjA5MzkyMjY0MX0.wyJk7afTo-HlkuyNIJbRzXPLSip7zXxT4t7wtAxpzmI';
 
 const _sbReady = (SUPABASE_URL !== 'YOUR_SUPABASE_URL');
 
 if (_sbReady) {
-  console.info('Supabase configured — scores will sync across all devices.');
+  console.info('Supabase configured ‚Äî scores will sync across all devices.');
 } else {
-  console.warn('Supabase not configured — scores will only be saved locally on this device.');
+  console.warn('Supabase not configured ‚Äî scores will only be saved locally on this device.');
 }
 
 /* ---------------- Storage ---------------- */
@@ -1044,7 +1044,7 @@ async function getScores() {
 
 /* Saves a score entry. Always writes to localStorage; also writes to Supabase if configured. */
 async function saveScore(entry) {
-  // Local backup — always
+  // Local backup ‚Äî always
   try {
     const local = JSON.parse(localStorage.getItem(LS_SCORES) || '[]');
     local.push(entry);
@@ -1053,7 +1053,7 @@ async function saveScore(entry) {
     console.warn('localStorage write failed:', e);
   }
 
-  // Cross-device — Supabase
+  // Cross-device ‚Äî Supabase
   if (_sbReady) {
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/scores`, {
@@ -1147,7 +1147,7 @@ function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) 
 function pick(arr) { return arr[randInt(0, arr.length - 1)]; }
 
 function makeQuestion() {
-  const op = pick(['+', '-', '×', '÷']);
+  const op = pick(['+', '-', '√ó', '√∑']);
   let a, b, correct;
   if (op === '+') {
     a = randInt(1, 50); b = randInt(1, 50);
@@ -1156,7 +1156,7 @@ function makeQuestion() {
     a = randInt(1, 50); b = randInt(1, 50);
     if (b > a) [a, b] = [b, a];
     correct = a - b;
-  } else if (op === '×') {
+  } else if (op === '√ó') {
     a = randInt(2, 12); b = randInt(2, 12);
     correct = a * b;
   } else {
@@ -1196,7 +1196,7 @@ function ensureAudio() {
     masterGain.gain.value = 0.25;
     masterGain.connect(audioCtx.destination);
     // Mobile browsers (iOS Safari especially) start AudioContext suspended
-    // even inside a user-gesture handler — resume immediately.
+    // even inside a user-gesture handler ‚Äî resume immediately.
     if (audioCtx.state === 'suspended') audioCtx.resume();
   } catch (e) { audioCtx = null; }
 }
@@ -1344,13 +1344,13 @@ function playBiteAnimation() {
     if (fangR) fangR.setAttribute('points', '24,60 23,63 22,60');
   }
 
-  // Phase 1 — Zumbara lunges onto the user, mouth open
+  // Phase 1 ‚Äî Zumbara lunges onto the user, mouth open
   if (zumb) zumb.setAttribute('transform', 'translate(492 0)');
   scene.classList.remove('warn', 'danger');
   scene.classList.add('biting');
   openMouth();
 
-  // Phase 2 — 200ms: chomp snaps shut, user recoils with X eyes
+  // Phase 2 ‚Äî 200ms: chomp snaps shut, user recoils with X eyes
   setTimeout(() => {
     closeMouth();
     if (user) user.setAttribute('transform', 'translate(537 0)');
@@ -1358,10 +1358,10 @@ function playBiteAnimation() {
     if (eyeHurt)   eyeHurt.style.display   = '';
     if (brow)      brow.setAttribute('d', 'M 13 51.5 Q 15 49.5 17 51.5'); // pain arch
 
-    // Phase 3 — 350ms: second chomp
+    // Phase 3 ‚Äî 350ms: second chomp
     setTimeout(() => {
       openMouth();
-      // Phase 4 — 500ms: snap shut and settle
+      // Phase 4 ‚Äî 500ms: snap shut and settle
       setTimeout(() => {
         closeMouth();
       }, 150);
@@ -1382,7 +1382,7 @@ function flashQuestion(good) {
 
 function answer(userSaysTrue) {
   if (!state || state.finished) return;
-  ensureAudio(); // re-check on every tap — critical for mobile AudioContext unlock
+  ensureAudio(); // re-check on every tap ‚Äî critical for mobile AudioContext unlock
   const correct = (userSaysTrue === state.currentQ.isTrue);
   if (correct) {
     state.correct++;
@@ -1433,7 +1433,7 @@ function finishQuiz() {
   const verdictEl = document.getElementById('verdict');
   const survivedLong = runMs >= 60_000;
   if (survivedLong) {
-    verdictEl.textContent = 'You held her off. The lake is quiet… for now.';
+    verdictEl.textContent = 'You held her off. The lake is quiet‚Ä¶ for now.';
     verdictEl.className = 'verdict survived';
   } else {
     verdictEl.textContent = 'Zumbara caught you. Try again at sunset.';
@@ -1537,7 +1537,7 @@ function renderPodium(top3, meUsername) {
     return;
   }
   podium.style.display = 'grid';
-  // Visual order: 2nd · 1st · 3rd
+  // Visual order: 2nd ¬∑ 1st ¬∑ 3rd
   const order = [
     { rank: 2, cls: 'second' },
     { rank: 1, cls: 'first' },
@@ -1549,7 +1549,7 @@ function renderPodium(top3, meUsername) {
       return `<div class="podium-step ${slot.cls} empty">
         <div class="trophy">${trophySVG(slot.rank)}</div>
         <div class="rank-label">${slot.rank}${rankSuffix(slot.rank)}</div>
-        <div class="podium-name" style="color:var(--muted)">—</div>
+        <div class="podium-name" style="color:var(--muted)">‚Äî</div>
         <div class="podium-meta"><span>no entry</span></div>
       </div>`;
     }
@@ -1575,7 +1575,7 @@ async function renderLeaderboard() {
   const body = document.getElementById('lbBody');
   const podium = document.getElementById('lbPodium');
   if (_sbReady) {
-    body.innerHTML = '<div class="empty" style="color:var(--muted)">Loading scores…</div>';
+    body.innerHTML = '<div class="empty" style="color:var(--muted)">Loading scores‚Ä¶</div>';
     if (podium) podium.style.display = 'none';
   }
 
@@ -1630,7 +1630,7 @@ async function renderLeaderboard() {
     return `<tr class="${isMe ? 'me' : ''}">
       <td class="rank">#${rank}</td>
       <td>${escapeHtml(s.username)}</td>
-      <td class="num">${s.age ?? '—'}</td>
+      <td class="num">${s.age ?? '‚Äî'}</td>
       <td class="num">${(s.runMs / 1000).toFixed(1)}s</td>
       <td class="num">${formatRatio(s.score, s.wrong)}</td>
       <td class="num">${s.score}</td>
@@ -1655,8 +1655,8 @@ function ratioValue(correct, wrong) {
   return correct / wrong;
 }
 function formatRatio(correct, wrong) {
-  if (wrong === 0 && correct === 0) return '—';
-  if (wrong === 0) return '∞';
+  if (wrong === 0 && correct === 0) return '‚Äî';
+  if (wrong === 0) return '‚àû';
   return (correct / wrong).toFixed(2);
 }
 function escapeHtml(s) {
