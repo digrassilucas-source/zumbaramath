@@ -1031,7 +1031,7 @@
         <button data-mode="byAge">By age</button>
       </nav>
       <div class="age-filter" id="ageFilterWrap" style="display:none;">
-        <label for="ageSelect">Age</label>
+        <label for="ageSelect">Age group</label>
         <select id="ageSelect"></select>
       </div>
     </div>
@@ -1539,7 +1539,7 @@ document.addEventListener('keydown', (e) => {
 
 /* ---------------- Leaderboard ---------------- */
 let lbMode = 'overall';
-let lbAge = null;
+let lbAgeGroup = 0;  // start of 10-yr band, e.g. 20 = "20–29"
 
 const lbTabs = document.getElementById('lbTabs');
 lbTabs.addEventListener('click', (e) => {
@@ -1553,15 +1553,15 @@ lbTabs.addEventListener('click', (e) => {
 
 const ageSelect = document.getElementById('ageSelect');
 (function populateAges() {
-  for (let a = 0; a <= 100; a++) {
+  for (let a = 0; a <= 90; a += 10) {
     const opt = document.createElement('option');
     opt.value = String(a);
-    opt.textContent = `${a}`;
+    opt.textContent = `${a}–${a + 9} yrs`;
     ageSelect.appendChild(opt);
   }
 })();
 ageSelect.addEventListener('change', () => {
-  lbAge = parseInt(ageSelect.value, 10);
+  lbAgeGroup = parseInt(ageSelect.value, 10);
   renderLeaderboard();
 });
 
@@ -1636,18 +1636,16 @@ function renderPodium(top3, meUsername) {
       <div class="podium-name">${escapeHtml(e.username)}</div>
       <div class="podium-meta">
         <span class="pm-time">${(e.runMs / 1000).toFixed(1)}s</span>
-        <span class="pm-ratio">${formatRatio(e.score, e.wrong)} ratio</span>
+        <span class="pm-ratio">${e.attempts || 1} run${(e.attempts||1)===1?'':'s'}</span>
       </div>
     </div>`;
   }).join('');
 }
 
 async function renderLeaderboard() {
-  // Show/hide the "local only" warning banner
   const banner = document.getElementById('fbBanner');
   if (banner) banner.classList.toggle('hidden', _sbReady);
 
-  // Show a loading placeholder while fetching from Supabase
   const body = document.getElementById('lbBody');
   const podium = document.getElementById('lbPodium');
   if (_sbReady) {
@@ -1656,25 +1654,35 @@ async function renderLeaderboard() {
   }
 
   const all = await getScores();
+
+  // Count total attempts per user across ALL scores
+  const attemptsMap = new Map();
+  for (const s of all) {
+    attemptsMap.set(s.username, (attemptsMap.get(s.username) || 0) + 1);
+  }
+
   let filtered = all;
   let title = '';
 
   if (lbMode === 'byAge') {
-    if (lbAge == null) {
+    // Snap current user’s age to nearest group on first load
+    if (!lbAgeGroup && lbAgeGroup !== 0) {
       const u = getCurrentUser();
-      lbAge = (u && typeof u.age === 'number') ? u.age : 25;
-      ageSelect.value = String(lbAge);
+      const age = (u && typeof u.age === 'number') ? u.age : 20;
+      lbAgeGroup = Math.floor(age / 10) * 10;
     }
-    filtered = all.filter(s => s.age === lbAge);
-    title = `Age ${lbAge}`;
+    const groupEnd = lbAgeGroup + 9;
+    ageSelect.value = String(Math.min(lbAgeGroup, 90));
+    filtered = all.filter(s => s.age != null && s.age >= lbAgeGroup && s.age <= groupEnd);
+    title = 'Age ' + lbAgeGroup + '–' + groupEnd;
   } else {
     title = 'Overall';
   }
 
-  // Deduplicate: best run per user
+  // Deduplicate: keep best run per user
   let unique = bestPerUser(filtered);
 
-  // Sort: longest run desc, then ratio desc, then ts asc
+  // Sort: longest survival desc → ratio desc → earliest ts
   unique.sort((a, b) => {
     if (b.runMs !== a.runMs) return b.runMs - a.runMs;
     const ra = ratioValue(a.score, a.wrong);
@@ -1683,48 +1691,42 @@ async function renderLeaderboard() {
     return a.ts - b.ts;
   });
 
+  // Attach attempt counts
+  unique = unique.map(s => ({ ...s, attempts: attemptsMap.get(s.username) || 1 }));
+
   const me = getCurrentUser();
   const meName = me ? me.username : null;
 
-  // Podium (always rendered if at least one entry; missing slots are empty)
   renderPodium(unique.slice(0, 3), meName);
 
   if (unique.length === 0) {
-    body.innerHTML = `<div class="empty">No survivors in ${escapeHtml(title)} yet. Be the first.</div>`;
+    body.innerHTML = '<div class="empty">No survivors in ' + escapeHtml(title) + ' yet. Be the first.</div>';
     return;
   }
 
-  // Table from rank 4 onward (top 3 are already in the podium)
   const rest = unique.slice(3, 100);
-  if (rest.length === 0) {
-    body.innerHTML = '';
-    return;
-  }
+  if (rest.length === 0) { body.innerHTML = ''; return; }
+
   const rows = rest.map((s, i) => {
     const rank = i + 4;
     const isMe = meName && s.username === meName;
-    return `<tr class="${isMe ? 'me' : ''}">
-      <td class="rank">#${rank}</td>
-      <td>${escapeHtml(s.username)}</td>
-      <td class="num">${s.age ?? '—'}</td>
-      <td class="num">${(s.runMs / 1000).toFixed(1)}s</td>
-      <td class="num">${formatRatio(s.score, s.wrong)}</td>
-      <td class="num">${s.score}</td>
-      <td class="num">${s.wrong}</td>
-    </tr>`;
+    return '<tr class="' + (isMe ? 'me' : '') + '">' +
+      '<td class="rank">#' + rank + '</td>' +
+      '<td>' + escapeHtml(s.username) + '</td>' +
+      '<td class="num">' + (s.age ?? '—') + '</td>' +
+      '<td class="num">' + s.attempts + '</td>' +
+      '<td class="num">' + (s.runMs / 1000).toFixed(1) + 's</td>' +
+      '<td class="num">' + s.score + '</td>' +
+      '<td class="num">' + s.wrong + '</td>' +
+      '</tr>';
   }).join('');
 
-  body.innerHTML = `
-    <table class="lb">
-      <thead>
-        <tr>
-          <th>#</th><th>Survivor</th><th>Age</th><th>Survived</th><th>Score</th><th>Right</th><th>Wrong</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>
-  `;
+  body.innerHTML =
+    '<table class="lb"><thead><tr>' +
+    '<th>#</th><th>Survivor</th><th>Age</th><th>Runs</th><th>Survived</th><th>Right</th><th>Wrong</th>' +
+    '</tr></thead><tbody>' + rows + '</tbody></table>';
 }
+
 
 function ratioValue(correct, wrong) {
   if (wrong === 0) return correct > 0 ? Infinity : 0;
