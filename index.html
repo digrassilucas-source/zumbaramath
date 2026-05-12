@@ -759,8 +759,7 @@
     opacity: 1;
   }
   .stats-popup-eye {
-    font-size: 2.6rem;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     line-height: 1;
   }
   .stats-popup h2 {
@@ -838,7 +837,40 @@
 <!-- Welcome stats popup -->
 <div id="stats-modal" role="dialog" aria-modal="true" aria-labelledby="stats-popup-title">
   <div class="stats-popup">
-    <div class="stats-popup-eye">🧟</div>
+    <div class="stats-popup-eye">
+      <svg viewBox="-6 36 40 46" width="80" height="80" aria-hidden="true" style="display:block;margin:0 auto;overflow:visible">
+        <defs>
+          <radialGradient id="popupEye">
+            <stop offset="0%"  stop-color="#ffd6d6"/>
+            <stop offset="40%" stop-color="#ff2222"/>
+            <stop offset="100%" stop-color="#ff2222" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <g>
+          <animateTransform attributeName="transform" type="translate" values="0 0; 0 -3; 0 0" dur="0.9s" repeatCount="indefinite" calcMode="spline" keySplines="0.45 0 0.55 1; 0.45 0 0.55 1"/>
+          <!-- Body -->
+          <ellipse cx="0"    cy="62" rx="18" ry="8"   fill="#2a3a55"/>
+          <!-- Legs -->
+          <rect x="-9" y="68" width="3" height="6" fill="#1f2c44" rx="1"/>
+          <rect x="6"  y="68" width="3" height="6" fill="#1f2c44" rx="1"/>
+          <!-- Head -->
+          <ellipse cx="14"   cy="52" rx="11" ry="11"  fill="#324768"/>
+          <!-- Ear -->
+          <ellipse cx="9"    cy="42" rx="3"  ry="2.5" fill="#1f2c44"/>
+          <!-- Snout -->
+          <ellipse cx="22"   cy="56" rx="5.5" ry="3"  fill="#3a4f6f"/>
+          <ellipse cx="24.5" cy="55" rx="0.7" ry="1"  fill="#0a0a14"/>
+          <!-- Mouth + fangs -->
+          <path d="M 17 60 Q 22 63 26 60" stroke="#0a0a14" stroke-width="0.7" fill="none"/>
+          <polygon points="20,60 21,63 22,60" fill="#fff8dd"/>
+          <polygon points="24,60 23,63 22,60" fill="#fff8dd"/>
+          <!-- Glowing red eye -->
+          <circle cx="17" cy="50" r="4"   fill="url(#popupEye)"/>
+          <circle cx="17" cy="50" r="2.2" fill="#ff2e2e"/>
+          <circle cx="17" cy="49.6" r="0.9" fill="#fff5f5"/>
+        </g>
+      </svg>
+    </div>
     <h2 id="stats-popup-title">Zumbara is watching…</h2>
     <p class="popup-sub">Here's what survivors have endured so far</p>
     <div class="stats-cards">
