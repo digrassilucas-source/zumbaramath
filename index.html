@@ -671,6 +671,54 @@
   }
 
 
+
+  /* ── Blood splatter overlay ── */
+  #blood-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+  }
+  .blood-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  @keyframes splatPop {
+    0%   { opacity: 0; }
+    15%  { opacity: 1; transform: scale(1.08) rotate(var(--rot,0deg)); }
+    100% { opacity: 0.92; transform: scale(1) rotate(var(--rot,0deg)); }
+  }
+  @keyframes dripGrow {
+    0%   { clip-path: inset(0 0 100% 0); opacity: 0.9; }
+    100% { clip-path: inset(0 0 0% 0); opacity: 0.85; }
+  }
+  @keyframes screenFlash {
+    0%   { opacity: 0.65; }
+    30%  { opacity: 0.45; }
+    100% { opacity: 0; }
+  }
+  @keyframes overlayFadeOut {
+    0%   { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  .blood-flash {
+    animation: screenFlash 0.55s ease-out forwards;
+  }
+  .blood-group {
+    animation: splatPop 0.38s ease-out forwards;
+    opacity: 0;
+  }
+  .blood-drip {
+    animation: dripGrow 0.55s ease-in forwards;
+    opacity: 0;
+  }
+  .blood-overlay-fadeout {
+    animation: overlayFadeOut 0.8s ease-in forwards;
+  }
+
 </style>
 </head>
 <body>
@@ -1478,6 +1526,158 @@ async function answer(userSaysTrue) {
   tick();
 }
 
+
+/* ──────────────────────────────────────────────
+   BLOOD SPLATTER — triggered when timer hits 0
+─────────────────────────────────────────────── */
+function spawnBlood() {
+  const overlay = document.getElementById('blood-overlay');
+  overlay.innerHTML = '';
+
+  // Use viewport units for positioning
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  svg.className = 'blood-svg';
+
+  // ── Screen flash rect ──
+  const flash = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  flash.setAttribute('x', '0'); flash.setAttribute('y', '0');
+  flash.setAttribute('width', W); flash.setAttribute('height', H);
+  flash.setAttribute('fill', '#8b0000');
+  flash.style.opacity = '0';
+  flash.classList.add('blood-flash');
+  svg.appendChild(flash);
+
+  // ── Splat definitions ──
+  // Each entry: [cx_pct, cy_pct, radius, numRays, delay_ms, angle_deg]
+  const splats = [
+    [0.5,  0.18, 95,  14, 0,   0 ],   // big centre-top (bite zone)
+    [0.15, 0.08, 60,  10, 60,  -25],   // top-left
+    [0.82, 0.12, 55,  10, 80,  18 ],   // top-right
+    [0.08, 0.45, 45,   8, 140, -40],   // mid-left edge
+    [0.92, 0.38, 40,   8, 160, 35 ],   // mid-right edge
+    [0.35, 0.05, 38,   8, 200, -10],   // top scatter
+    [0.68, 0.07, 42,   8, 220, 15 ],   // top scatter 2
+    [0.22, 0.78, 35,   7, 280, 20 ],   // bottom-left
+    [0.72, 0.82, 30,   6, 300, -15],   // bottom-right
+  ];
+
+  const darkRed  = '#6b0000';
+  const midRed   = '#8b1a1a';
+  const brightRed = '#b91c1c';
+
+  splats.forEach(([cxp, cyp, r, rays, delay, angle]) => {
+    const cx = Math.round(cxp * W);
+    const cy = Math.round(cyp * H);
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.style.setProperty('--rot', angle + 'deg');
+    g.setAttribute('transform-origin', cx + ' ' + cy);
+    g.style.animationDelay = delay + 'ms';
+    g.classList.add('blood-group');
+
+    // Core blob — organic circle
+    const blob = splatPath(cx, cy, r, rays);
+    blob.setAttribute('fill', midRed);
+    blob.setAttribute('opacity', '0.92');
+    g.appendChild(blob);
+
+    // Inner darker core
+    const inner = splatPath(cx, cy, r * 0.55, Math.ceil(rays * 0.7));
+    inner.setAttribute('fill', darkRed);
+    inner.setAttribute('opacity', '0.85');
+    g.appendChild(inner);
+
+    // Scattered micro-drops around the splat
+    const dropCount = Math.floor(rays * 0.7);
+    for (let d = 0; d < dropCount; d++) {
+      const dAngle = (d / dropCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.8;
+      const dist = r * (1.2 + Math.random() * 0.9);
+      const dx = cx + Math.cos(dAngle) * dist;
+      const dy = cy + Math.sin(dAngle) * dist;
+      const dr = 3 + Math.random() * (r * 0.18);
+      const drop = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+      drop.setAttribute('cx', dx.toFixed(1));
+      drop.setAttribute('cy', dy.toFixed(1));
+      drop.setAttribute('rx', dr.toFixed(1));
+      drop.setAttribute('ry', (dr * (0.6 + Math.random() * 0.6)).toFixed(1));
+      drop.setAttribute('fill', Math.random() > 0.5 ? brightRed : darkRed);
+      drop.setAttribute('opacity', (0.6 + Math.random() * 0.35).toFixed(2));
+      drop.setAttribute('transform', `rotate(${(Math.random()*60-30).toFixed(1)} ${dx.toFixed(1)} ${dy.toFixed(1)})`);
+      g.appendChild(drop);
+    }
+
+    svg.appendChild(g);
+
+    // ── Drips: long streaks falling downward from top splats ──
+    if (cyp < 0.35) {
+      const dripCount = 2 + Math.floor(r / 30);
+      for (let k = 0; k < dripCount; k++) {
+        const dripX = cx + (Math.random() - 0.5) * r * 1.4;
+        const dripLen = (H * 0.18) + Math.random() * H * 0.35;
+        const dripW = 3 + Math.random() * 8;
+
+        // Rounded bottom drip tip
+        const dripG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        dripG.style.animationDelay = (delay + 200 + k * 60) + 'ms';
+        dripG.classList.add('blood-drip');
+        dripG.style.transformOrigin = dripX.toFixed(1) + 'px ' + (cy + r).toFixed(1) + 'px';
+
+        const streak = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        const topY = cy + r * 0.6;
+        const tipY = topY + dripLen;
+        streak.setAttribute('d',
+          `M ${(dripX - dripW/2).toFixed(1)} ${topY.toFixed(1)} ` +
+          `L ${(dripX + dripW/2).toFixed(1)} ${topY.toFixed(1)} ` +
+          `Q ${(dripX + dripW/2 + 1).toFixed(1)} ${(tipY - dripW).toFixed(1)} ` +
+          `  ${dripX.toFixed(1)} ${tipY.toFixed(1)} ` +
+          `Q ${(dripX - dripW/2 - 1).toFixed(1)} ${(tipY - dripW).toFixed(1)} ` +
+          `  ${(dripX - dripW/2).toFixed(1)} ${topY.toFixed(1)} Z`
+        );
+        streak.setAttribute('fill', midRed);
+        streak.setAttribute('opacity', '0.88');
+        dripG.appendChild(streak);
+        svg.appendChild(dripG);
+      }
+    }
+  });
+
+  overlay.appendChild(svg);
+
+  // Fade the whole overlay out after 1.8 s, remove after 2.6 s
+  setTimeout(() => {
+    overlay.classList.add('blood-overlay-fadeout');
+    setTimeout(() => { overlay.innerHTML = ''; overlay.classList.remove('blood-overlay-fadeout'); }, 850);
+  }, 1800);
+}
+
+/* Build an organic splat path centred at (cx,cy) with radius r and n rays */
+function splatPath(cx, cy, r, n) {
+  const pts = [];
+  for (let i = 0; i < n; i++) {
+    const base = (i / n) * Math.PI * 2;
+    // alternate between protruding "rays" and recessed "valleys"
+    const isRay = i % 2 === 0;
+    const spread = (Math.PI * 2 / n) * 0.45;
+    const angle = base + (Math.random() - 0.5) * spread;
+    const dist = isRay
+      ? r * (0.85 + Math.random() * 0.35)
+      : r * (0.45 + Math.random() * 0.25);
+    pts.push([cx + Math.cos(angle) * dist, cy + Math.sin(angle) * dist]);
+  }
+  // Build a smooth polygon
+  let d = `M ${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+  for (let i = 1; i < pts.length; i++) d += ` L ${pts[i][0].toFixed(1)} ${pts[i][1].toFixed(1)}`;
+  d += ' Z';
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', d);
+  return path;
+}
+
 function finishQuiz() {
   if (state.finished) return;
   state.finished = true;
@@ -1516,9 +1716,10 @@ function finishQuiz() {
     verdictEl.className = 'verdict caught';
   }
 
-  // Play the bite animation in the chase scene, then transition to results
+  // Bite animation in chase scene + full-screen blood splatter, then results
   playBiteAnimation();
-  setTimeout(() => showView('results'), 750);
+  spawnBlood();
+  setTimeout(() => showView('results'), 1100);
 }
 
 document.getElementById('btnTrue').addEventListener('click', () => answer(true));
@@ -1750,5 +1951,7 @@ function escapeHtml(s) {
   else showView('home'); // loginPanel visible by default, startPanel hidden
 })();
 </script>
+
+<div id="blood-overlay"></div>
 </body>
 </html>
