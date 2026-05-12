@@ -619,16 +619,18 @@
     margin-bottom: 24px;
     border-radius: var(--radius);
     overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   .zumb-hero-img {
     width: 100%;
-    height: 280px;
-    object-fit: cover;
-    object-position: center 20%;
+    max-width: 100%;
+    height: auto;
+    max-height: 55vh;
+    object-fit: contain;
+    object-position: center center;
     display: block;
-  }
-  @media (max-width: 540px) {
-    .zumb-hero-img { height: 200px; }
   }
 
   /* Leaderboard background overlay */
