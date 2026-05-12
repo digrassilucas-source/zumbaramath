@@ -1685,7 +1685,12 @@ function finishQuiz() {
   document.getElementById('progressBar').style.width = '0%';
   document.getElementById('timer').textContent = '0.0';
 
-  const runMs = (performance.now() - state.startTs);
+  // Cap runMs to the theoretical maximum to prevent inflated values caused by
+  // device sleep / tab backgrounding (performance.now() advances but setInterval
+  // is frozen, so elapsed >> actual game time when the device wakes up).
+  const rawMs = performance.now() - state.startTs;
+  const theoreticalMaxMs = START_MS + state.adjustmentMs; // 60 000 + (correct−wrong)×1 000
+  const runMs = Math.min(rawMs, Math.max(0, theoreticalMaxMs) + 500); // 500 ms tick tolerance
   const u = getCurrentUser();
   if (u) {
     // saveScore is async; fire-and-forget (localStorage write is immediate,
@@ -1854,7 +1859,12 @@ async function renderLeaderboard() {
     if (podium) podium.style.display = 'none';
   }
 
-  const all = await getScores();
+  const all = (await getScores()).filter(s => {
+    // Sanity check: runMs cannot exceed 60 000ms + correct answers × 1 000ms.
+    // Any entry exceeding this was caused by device-sleep inflating performance.now().
+    const maxExpected = START_MS + (s.score || 0) * BONUS_MS + 2000; // 2 s tolerance
+    return !s.runMs || s.runMs <= maxExpected;
+  });
 
   // Count total attempts per user across ALL scores
   const attemptsMap = new Map();
