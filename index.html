@@ -1540,6 +1540,9 @@ function startQuiz() {
     finished: false,
     timerHandle: null,
     currentQ: makeQuestion(),
+    answerTimes: [],   // ms from question render → answer click (anti-cheat)
+    questionTs: performance.now(), // timestamp of current question display
+    botFlagged: false, // set true if any answer arrives impossibly fast
   };
   document.getElementById('correctCount').textContent = '0';
   document.getElementById('wrongCount').textContent = '0';
@@ -1662,6 +1665,7 @@ function playBiteAnimation() {
 
 function renderQuestion() {
   document.getElementById('questionText').textContent = state.currentQ.text;
+  state.questionTs = performance.now(); // reset clock for anti-cheat timing
 }
 
 function flashQuestion(good) {
@@ -1671,8 +1675,20 @@ function flashQuestion(good) {
   el.classList.add(good ? 'flash-good' : 'flash-bad');
 }
 
+/* Minimum human reaction time in ms. Any single answer faster than this is
+   physically impossible for a human and indicates an automated agent/bot. */
+const BOT_REACTION_MS = 200;
+
 async function answer(userSaysTrue) {
   if (!state || state.finished) return;
+
+  // ── Anti-cheat: measure how fast this answer arrived ──
+  const reactionMs = performance.now() - state.questionTs;
+  state.answerTimes.push(reactionMs);
+  if (reactionMs < BOT_REACTION_MS) {
+    state.botFlagged = true; // will be checked in finishQuiz
+  }
+
   await ensureAudio();
   const correct = (userSaysTrue === state.currentQ.isTrue);
   if (correct) {
@@ -1858,10 +1874,14 @@ function finishQuiz() {
   const rawMs = performance.now() - state.startTs;
   const theoreticalMaxMs = START_MS + state.adjustmentMs; // 60 000 + (correct−wrong)×1 000
   const runMs = Math.min(rawMs, Math.max(0, theoreticalMaxMs) + 500); // 500 ms tick tolerance
+
+  // ── Anti-cheat: skip saving if bot behaviour detected ──
+  const isBotRun = state.botFlagged;
+
   const u = getCurrentUser();
-  if (u) {
+  if (u && !isBotRun) {
     // saveScore is async; fire-and-forget (localStorage write is immediate,
-    // Firestore write resolves in the background).
+    // Supabase write resolves in the background).
     saveScore({
       username: u.username,
       age: u.age,
@@ -1879,13 +1899,18 @@ function finishQuiz() {
 
   // Verdict text
   const verdictEl = document.getElementById('verdict');
-  const survivedLong = runMs >= 60_000;
-  if (survivedLong) {
-    verdictEl.textContent = 'You held her off. The lake is quiet… for now.';
-    verdictEl.className = 'verdict survived';
-  } else {
-    verdictEl.textContent = 'Zumbara caught you. Try again at sunset.';
+  if (isBotRun) {
+    verdictEl.textContent = '🤖 Automated run detected — score not saved to leaderboard.';
     verdictEl.className = 'verdict caught';
+  } else {
+    const survivedLong = runMs >= 60_000;
+    if (survivedLong) {
+      verdictEl.textContent = 'You held her off. The lake is quiet… for now.';
+      verdictEl.className = 'verdict survived';
+    } else {
+      verdictEl.textContent = 'Zumbara caught you. Try again at sunset.';
+      verdictEl.className = 'verdict caught';
+    }
   }
 
   // Bite animation in chase scene + full-screen blood splatter, then results
@@ -2026,7 +2051,13 @@ async function renderLeaderboard() {
     if (podium) podium.style.display = 'none';
   }
 
+  // IDs of runs confirmed to have been submitted by automated agents / AI bots.
+  // These are excluded permanently from all leaderboard views.
+  const BOT_ENTRY_IDS = new Set([113, 112]);
+
   const all = (await getScores()).filter(s => {
+    // Exclude confirmed bot entries by ID
+    if (s.id != null && BOT_ENTRY_IDS.has(s.id)) return false;
     // Sanity check: runMs cannot exceed 60 000ms + correct answers × 1 000ms.
     // Any entry exceeding this was caused by device-sleep inflating performance.now().
     const maxExpected = START_MS + (s.score || 0) * BONUS_MS + 2000; // 2 s tolerance
