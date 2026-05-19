@@ -2053,7 +2053,7 @@ async function renderLeaderboard() {
 
   // IDs of runs confirmed to have been submitted by automated agents / AI bots.
   // These are excluded permanently from all leaderboard views.
-  const BOT_ENTRY_IDS = new Set([113, 112]);
+  const BOT_ENTRY_IDS = new Set([113, 112, 323]);
 
   const all = (await getScores()).filter(s => {
     // Exclude confirmed bot entries by ID
